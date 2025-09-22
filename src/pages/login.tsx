@@ -1,268 +1,338 @@
-import React, { useState } from "react";
+"use client";
+import React, { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { AnimatePresence, motion, type Transition } from "framer-motion";
+
+type Mode = "login" | "signup";
+
+const spring: Transition = {
+  type: "spring",
+  stiffness: 260,
+  damping: 26,
+};
+
+const leftImages = [
+  "/Pine/online.jpg",
+  "/Pine/instore.jpg",
+  "/Pine/prepaid.jpg",
+  "/Pine/credit.jpg",
+];
 
 const SignInUpForm: React.FC = () => {
-  const [isRightPanelActive, setIsRightPanelActive] = useState<boolean>(false);
+  const [mode, setMode] = useState<Mode>("login");
+
+  const [imgIndex, setImgIndex] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setImgIndex((prev) => (prev + 1) % leftImages.length);
+    }, 8000);
+    return () => clearInterval(id);
+  }, []);
+
+  const [lemail, setLEmail] = useState("");
+  const [lpassword, setLPassword] = useState("");
+  const [remember, setRemember] = useState(true);
+
+  const [name, setName] = useState("");
+  const [semail, setSEmail] = useState("");
+  const [spassword, setSPassword] = useState("");
+  const [sconfirm, setSConfirm] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [ok, setOk] = useState<string | null>(null);
+
+  async function onLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setErr(null);
+    setOk(null);
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: lemail.trim(),
+      password: lpassword,
+    });
+    setLoading(false);
+    if (error) return setErr(error.message || "Login failed.");
+    setOk("Logged in successfully.");
+  }
+
+  async function onSignup(e: React.FormEvent) {
+    e.preventDefault();
+    setErr(null);
+    setOk(null);
+    if (!name.trim()) return setErr("Please enter your full name.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(semail))
+      return setErr("Enter a valid email.");
+    if (spassword.length < 6)
+      return setErr("Password must be at least 6 characters.");
+    if (spassword !== sconfirm) return setErr("Passwords do not match.");
+
+    setLoading(true);
+    const { error, data } = await supabase.auth.signUp({
+      email: semail.trim(),
+      password: spassword,
+      options: { data: { name: name.trim() } },
+    });
+    setLoading(false);
+    if (error) return setErr(error.message || "Sign up failed.");
+    if (data?.user?.identities?.length === 0) {
+      return setErr("This email is already registered. Try logging in.");
+    }
+    setOk("Account created! Check your email for verification.");
+  }
+
+  // 🌐 OAuth login
+  async function oauth(provider: "google" | "facebook" | "instagram") {
+    if (provider === "instagram") return;
+    await supabase.auth.signInWithOAuth({ provider });
+  }
+
+  const heading = mode === "login" ? "Login" : "Sign Up";
+  const subText =
+    mode === "login"
+      ? "Please login to continue"
+      : "Create your account to continue";
 
   return (
-    <div className="flex items-center justify-center flex-col h-screen bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)] font-montserrat ">
-      <nav className="bg-white rounded-[50px] mb-10 p-6">
-        <img src="/Pine/logo.png" alt="" className="" />
-      </nav>
-      <div
-        className={`container relative overflow-hidden w-[768px] max-w-full min-h-[480px] bg-white rounded-[10px] shadow-[0_28px_38px_rgba(0,0,0,0.25),0_20px_20px_rgba(0,0,0,0.22)] ${
-          isRightPanelActive ? "right-panel-active" : ""
-        }`}
-        id="container"
-      >
-        <div className="form-container sign-up-container absolute top-0 h-full transition-all duration-[0.6s] ease-in-out left-0 w-1/2 opacity-0 z-[1]">
-          <form className="bg-white flex items-center justify-center flex-col px-[50px] h-full text-center">
-            <h1 className="font-bold m-0 text-2xl">Create Account</h1>
-            <div className="flex justify-between items-center gap-2 py-10">
-              <a
-                href="http://"
-                className="bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)] rounded-full p-2 border-2   border-black"
-              >
-                <img src="/Pine/facebook.png" alt="" className="h-10" />
-              </a>
-              <a
-                href="http://"
-                className="bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)] rounded-full p-2 border-2     border-black"
-              >
-                <img src="/Pine/google.png" alt="" className="h-10" />
-              </a>
-              <a
-                href="http://"
-                className="bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)] rounded-full p-2 border-2  border-black"
-              >
-                <img src="/Pine/discord.png" alt="" className="h-10" />
-              </a>
-            </div>
-            <span className="text-xl">or use your email for registration</span>
-            <input
-              type="text"
-              placeholder="Name"
-              className="bg-[#eee] border-none p-[12px_15px] my-2 w-full"
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              className="bg-[#eee] border-none p-[12px_15px] my-2 w-full"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              className="bg-[#eee] border-none p-[12px_15px] my-2 w-full"
-            />
-            <button className="rounded-[20px] border border-[#FF4B2B] bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)] text-white  font-bold py-3 px-[45px] tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-95 focus:outline-none text-xl">
-              Sign Up
-            </button>
-          </form>
-        </div>
-        <div className="form-container sign-in-container absolute top-0 h-full transition-all duration-[0.6s] ease-in-out left-0 w-1/2 z-[2]">
-          <form className="bg-white flex items-center justify-center flex-col px-[50px] h-full text-center">
-            <h1 className=" m-0 text-2xl">Sign in</h1>
-            <div className="flex justify-between items-center gap-2 py-10">
-              <a
-                href="http://"
-                className="bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)] rounded-full p-2 border-2   border-black"
-              >
-                <img src="/Pine/facebook.png" alt="" className="h-10" />
-              </a>
-              <a
-                href="http://"
-                className="bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)] rounded-full p-2 border-2     border-black"
-              >
-                <img src="/Pine/google.png" alt="" className="h-10" />
-              </a>
-              <a
-                href="http://"
-                className="bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)] rounded-full p-2 border-2  border-black"
-              >
-                <img src="/Pine/discord.png" alt="" className="h-10" />
-              </a>
-            </div>
-
-            <span className="text-xl">or use your account</span>
-            <input
-              type="email"
-              placeholder="Email"
-              className="bg-[#eee] border-none p-[12px_15px] my-2 w-full"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              className="bg-[#eee] border-none p-[12px_15px] my-2 w-full"
-            />
-            <a
-              href="#"
-              className="text-[#333] text-sm no-underline my-[15px_0]"
-            >
-              Forgot your password?
-            </a>
-            <button className="rounded-[20px] border border-[#f43b60] bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)] text-white text-xl  py-2 px-[45px] tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-95 focus:outline-none">
-              Sign In
-            </button>
-          </form>
-        </div>
-        <div className="overlay-container absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-[0.6s] ease-in-out z-[100]">
-          <div className="overlay bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)] bg-no-repeat bg-cover bg-[0_0] text-white relative -left-full h-full w-[200%] translate-x-0 transition-transform duration-[0.6s] ease-in-out">
-            <div className="overlay-panel overlay-left absolute flex items-center justify-center flex-col px-10 text-center top-0 h-full w-1/2 translate-x-0 transition-transform duration-[0.6s] ease-in-out ">
-              <h1 className="font-bold m-0 text-3xl">Welcome Back!</h1>
-              <p className="text-xl font-light leading-5 tracking-[0.5px] my-5 mx-0">
-                To keep connected with us please login with your personal info
-              </p>
-              <button
-                className="ghost rounded-[20px] border border-white bg-transparent text-white text-xl  py-3 px-[45px] tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-95 focus:outline-none"
-                onClick={() => setIsRightPanelActive(false)}
-              >
-                Sign In
-              </button>
-            </div>
-            <div className="overlay-panel overlay-right absolute flex items-center justify-center flex-col px-10 text-center top-0 h-full w-1/2 translate-x-0 transition-transform duration-[0.6s] ease-in-out right-0">
-              <h1 className="font-bold m-0 text-3xl">Hello, Friend!</h1>
-              <p className="text-sm font-light leading-5 tracking-[0.5px] my-5 mx-0 text-xl">
-                Enter your personal details and start journey with us
-              </p>
-              <button
-                className="ghost rounded-[20px] border border-white bg-transparent text-white   py-3 px-[45px] tracking-wider uppercase transition-transform duration-[80ms] ease-in active:scale-95 focus:outline-none text-xl"
-                onClick={() => setIsRightPanelActive(true)}
-              >
-                Sign Up
-              </button>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen  bg-pink-400/20">
+      <div className="p-10">
+        <img src="/Pine/logo.png" alt="" />
       </div>
+      <div
+        className="  w-full flex items-center justify-center p-4"
 
-      <style>{`
-        @import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
+      >
+        <motion.div
+          layout
+          transition={spring}
+          className="relative w-full max-w-5xl rounded-[28px] bg-white/90 backdrop-blur-sm border border-pink-100 shadow-[0_10px_35px_rgba(215,19,125,.18)]"
+        >
+          {/* subtle top glow */}
+          <div className="pointer-events-none absolute -top-3 left-6 right-6 h-3 rounded-b-full bg-gradient-to-r from-[#ff6a3d] via-[#ff2d55] to-[#d7137d] blur-2xl opacity-60" />
 
-        .container.right-panel-active .sign-in-container {
-          transform: translateX(100%);
-        }
+          <div className="grid lg:grid-cols-2 gap-0">
+            {/* LEFT: rotating circle image */}
+            <div className="relative flex items-center justify-center p-10">
+              <div className="relative h-72 w-72 sm:h-80 sm:w-80">
+                <div className="absolute inset-0 rounded-full blur-2xl opacity-70 bg-gradient-to-br from-[#ff6a3d] via-[#ff2d55] to-[#d7137d]" />
+                <div className="relative h-full w-full rounded-full overflow-hidden ring-8 ring-white shadow-xl">
+                  <AnimatePresence mode="wait">
+                    <motion.img
+                      key={imgIndex}
+                      src={leftImages[imgIndex]}
+                      alt="Welcome"
+                      initial={{ opacity: 0, scale: 1.05 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.8 }}
+                      className="h-full w-full object-cover"
+                    />
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
 
-        .container.right-panel-active .sign-up-container {
-          transform: translateX(100%);
-          opacity: 1;
-          z-index: 5;
-          animation: show 0.6s;
-        }
+            {/* RIGHT: forms */}
+            <motion.div layout transition={spring} className="p-8 sm:p-10">
+              {/* Toggle */}
+              <div className="mb-6 relative inline-flex rounded-full bg-neutral-100 p-1">
+                <motion.span
+                  layout
+                  transition={spring}
+                  className={`absolute top-1 bottom-1 w-1/2 rounded-full bg-gradient-to-r from-[#ff6a3d] via-[#ff2d55] to-[#d7137d] shadow ${
+                    mode === "login" ? "left-1" : "left-1/2"
+                  }`}
+                  style={{ left: mode === "login" ? 4 : "50%" }}
+                />
+                <button
+                  onClick={() => {
+                    setMode("login");
+                    setErr(null);
+                    setOk(null);
+                  }}
+                  className={`relative z-10 px-5 py-2 text-sm font-medium rounded-full transition ${
+                    mode === "login"
+                      ? "text-white"
+                      : "text-neutral-700 hover:text-neutral-900"
+                  }`}
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => {
+                    setMode("signup");
+                    setErr(null);
+                    setOk(null);
+                  }}
+                  className={`relative z-10 px-5 py-2 text-sm font-medium rounded-full transition ${
+                    mode === "signup"
+                      ? "text-white"
+                      : "text-neutral-700 hover:text-neutral-900"
+                  }`}
+                >
+                  Sign Up
+                </button>
+              </div>
 
-        @keyframes show {
-          0%, 49.99% {
-            opacity: 0;
-            z-index: 1;
-          }
+              {/* Headings */}
+              <motion.h1
+                key={heading}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={spring}
+                className="text-3xl font-extrabold tracking-tight text-[#d7137d]"
+              >
+                {heading}
+              </motion.h1>
+              <motion.p
+                key={subText}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "tween", duration: 0.25 }}
+                className="mt-1 text-sm text-neutral-500"
+              >
+                {subText}
+              </motion.p>
 
-          50%, 100% {
-            opacity: 1;
-            z-index: 5;
-          }
-        }
+              {/* Alerts */}
+              <AnimatePresence mode="wait">
+                {err && (
+                  <motion.div
+                    key="err"
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ type: "tween", duration: 0.2 }}
+                    className="mt-4 rounded-md bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-600"
+                  >
+                    {err}
+                  </motion.div>
+                )}
+                {ok && (
+                  <motion.div
+                    key="ok"
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ type: "tween", duration: 0.2 }}
+                    className="mt-4 rounded-md bg-green-50 border border-green-200 px-3 py-2 text-xs text-green-700"
+                  >
+                    {ok}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-        .container.right-panel-active .overlay-container {
-          transform: translateX(-100%);
-        }
-
-        .container.right-panel-active .overlay {
-          transform: translateX(50%);
-        }
-
-        .overlay-left {
-          transform: translateX(-20%);
-        }
-
-        .container.right-panel-active .overlay-left {
-          transform: translateX(0);
-        }
-
-        .container.right-panel-active .overlay-right {
-          transform: translateX(20%);
-        }
-
-        /* Add animations if needed, assuming Tailwind config for custom animations */
-        .social-container a {
-          animation: popIn 0.5s ease-out forwards;
-          opacity: 0;
-          transform: scale(0);
-        }
-
-        .social-container a:nth-child(1) {
-          animation-delay: 0.2s;
-        }
-
-        .social-container a:nth-child(2) {
-          animation-delay: 0.4s;
-        }
-
-        .social-container a:nth-child(3) {
-          animation-delay: 0.6s;
-        }
-
-        @keyframes popIn {
-          0% {
-            transform: scale(0);
-            opacity: 0;
-          }
-          60% {
-            transform: scale(1.2);
-            opacity: 1;
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-
-        input {
-          animation: fadeInUp 0.5s ease forwards;
-          opacity: 0;
-        }
-
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .container {
-          animation: fadeIn 1s ease-in;
-        }
-
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        /* Sequential delays for inputs */
-        .sign-up-container input:nth-child(3) { /* Name */
-          animation-delay: 0.8s;
-        }
-
-        .sign-up-container input:nth-child(4) { /* Email */
-          animation-delay: 1.0s;
-        }
-
-        .sign-up-container input:nth-child(5) { /* Password */
-          animation-delay: 1.2s;
-        }
-
-        .sign-in-container input:nth-child(3) { /* Email */
-          animation-delay: 0.8s;
-        }
-
-        .sign-in-container input:nth-child(4) { /* Password */
-          animation-delay: 1.0s;
-        }
-      `}</style>
+              {/* Forms */}
+              <div className="mt-6">
+                <AnimatePresence mode="wait">
+                  {mode === "login" ? (
+                    <motion.form
+                      key="login"
+                      onSubmit={onLogin}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -12 }}
+                      transition={spring}
+                      className="space-y-5"
+                    >
+                      <input
+                        type="email"
+                        placeholder="Email"
+                        value={lemail}
+                        onChange={(e) => setLEmail(e.target.value)}
+                        className="w-full rounded-md border px-4 py-3 text-sm outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
+                        required
+                      />
+                      <input
+                        type="password"
+                        placeholder="Password"
+                        value={lpassword}
+                        onChange={(e) => setLPassword(e.target.value)}
+                        className="w-full rounded-md border px-4 py-3 text-sm outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
+                        required
+                      />
+                      <div className="flex items-center justify-between text-sm">
+                        <label className="inline-flex items-center gap-2 text-neutral-600 select-none">
+                          <input
+                            type="checkbox"
+                            checked={remember}
+                            onChange={(e) => setRemember(e.target.checked)}
+                            className="h-4 w-4 rounded border-neutral-300 text-pink-600 focus:ring-pink-500"
+                          />
+                          Keep Me Login In
+                        </label>
+                        <button
+                          type="button"
+                          className="font-medium text-pink-600 hover:text-pink-700"
+                        >
+                          Forget Password?
+                        </button>
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full rounded-md bg-gradient-to-r from-[#ff6a3d] via-[#ff2d55] to-[#d7137d] px-6 py-3 text-sm font-semibold text-white shadow hover:brightness-110 disabled:opacity-70 transition"
+                      >
+                        {loading ? "Logging in..." : "Login"}
+                      </button>
+                    </motion.form>
+                  ) : (
+                    <motion.form
+                      key="signup"
+                      onSubmit={onSignup}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -12 }}
+                      transition={spring}
+                      className="space-y-5"
+                    >
+                      <input
+                        type="text"
+                        placeholder="Full Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full rounded-md border px-4 py-3 text-sm outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
+                        required
+                      />
+                      <input
+                        type="email"
+                        placeholder="Email"
+                        value={semail}
+                        onChange={(e) => setSEmail(e.target.value)}
+                        className="w-full rounded-md border px-4 py-3 text-sm outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
+                        required
+                      />
+                      <input
+                        type="password"
+                        placeholder="Password"
+                        value={spassword}
+                        onChange={(e) => setSPassword(e.target.value)}
+                        className="w-full rounded-md border px-4 py-3 text-sm outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
+                        required
+                      />
+                      <input
+                        type="password"
+                        placeholder="Confirm Password"
+                        value={sconfirm}
+                        onChange={(e) => setSConfirm(e.target.value)}
+                        className="w-full rounded-md border px-4 py-3 text-sm outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
+                        required
+                      />
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full rounded-md bg-gradient-to-r from-[#ff6a3d] via-[#ff2d55] to-[#d7137d] px-6 py-3 text-sm font-semibold text-white shadow hover:brightness-110 disabled:opacity-70 transition"
+                      >
+                        {loading ? "Creating account..." : "Create Account"}
+                      </button>
+                    </motion.form>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 };

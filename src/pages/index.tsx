@@ -6,6 +6,7 @@ import ScrollSwap from "@/components/ScrollSwap";
 import Runways from "@/components/Runways";
 import MarqueeCarousel from "@/components/MarqueeCarousel";
 import RedVideoCards from "@/components/RedVideoCards";
+import RedVideoCards2 from "@/components/redvideocard2";
 import PlatformCards from "@/components/PlatformCards";
 import CtaSection from "@/components/CtaSection";
 import Footer from "@/components/Footer";
@@ -14,7 +15,7 @@ import Rewies from "@/components/rewies";
 
 export default function Index() {
   return (
-    <div className="min-h-dvh bg-white text-ink font-sans">
+    <div className="min-h-dvh bg-white text-ink font-sans scroll-x-none">
       <Navbar />
       <Hero />
       <div className="hidden md:block">
@@ -22,6 +23,7 @@ export default function Index() {
       </div>
       <ScrollSwap />
       <Runways />
+      <RedVideoCards2/>
       <CurvedLoop
         marqueeText=" ✦ Ideas ✦ brought ✦ to ✦ life ✦ with ✦ Onetapay"
         speed={2}
