@@ -56,6 +56,7 @@ const SignInUpForm: React.FC = () => {
     setOk("Logged in successfully.");
   }
 
+  // 🆕 Signup
   async function onSignup(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
@@ -95,7 +96,7 @@ const SignInUpForm: React.FC = () => {
 
   return (
     <div className="min-h-screen  bg-pink-400/20">
-      <div className="p-10">
+      <div className="p-10 flex items-center md:justify-start justify-center ">
         <img src="/Pine/logo.png" alt="" />
       </div>
       <div

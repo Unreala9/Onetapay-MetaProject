@@ -92,8 +92,8 @@ export default function Footer() {
           <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-8">
             {/* Left: logo + badges (stack → row) */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-              <div className="flex items-center gap-3">
-                <div className="bg-white p-2.5 rounded-full shadow">
+              <div className=" gap-3 flex items-center justify-center ">
+                <div className="bg-white p-2.5 rounded-full shadow md:ml-0 ">
                   <a href="#" className="block">
                     <img
                       src="/Pine/logo.png"
@@ -105,7 +105,7 @@ export default function Footer() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap md:justify-start justify-center items-center gap-6">
                 <a href="#" aria-label="Download on the App Store">
                   <img
                     src="/Pine/appstore-badge.svg"
@@ -130,8 +130,6 @@ export default function Footer() {
                 </a>
               </div>
             </div>
-
-
           </div>
         </div>
       </section>

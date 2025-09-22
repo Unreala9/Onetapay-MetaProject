@@ -128,16 +128,18 @@ export default function ScrollSwap() {
                   alt=""
                 />
 
-                <button
-                  className="
+                <div className="flex items-center justify-center">
+                  <button
+                    className="
                     mt-5 inline-flex rounded-full px-5 py-2.5 md:px-6 md:py-3
                     text-sm md:text-base font-extrabold text-white
                     bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)]
                     hover:brightness-110 active:brightness-95 transition
                   "
-                >
-                  Explore now
-                </button>
+                  >
+                    Explore now
+                  </button>
+                </div>
               </article>
             ))}
           </div>

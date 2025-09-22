@@ -12,6 +12,7 @@ import CtaSection from "@/components/CtaSection";
 import Footer from "@/components/Footer";
 import CurvedLoop from "@/components/CurvedloopProps";
 import Rewies from "@/components/rewies";
+import Features from "@/components/features"
 
 export default function Index() {
   return (
@@ -23,11 +24,12 @@ export default function Index() {
       </div>
       <ScrollSwap />
       <Runways />
-      <RedVideoCards2/>
+      <RedVideoCards2 />
+      <Features />
       <CurvedLoop
         marqueeText=" ✦ Ideas ✦ brought ✦ to ✦ life ✦ with ✦ Onetapay"
         speed={2}
-        curveAmount={100}
+        curveAmount={0}
         direction="right"
         interactive
         className="text-[60px]"

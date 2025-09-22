@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 
-
 type Item = {
   text: string;
   img?: string;
@@ -144,29 +143,42 @@ export default function Runways() {
 
   return (
     <section className="relative overflow-hidden my-12">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 lg:py-24">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-start">
           {/* LEFT copy */}
-          <div className="">
-            <div className="lg:sticky lg:top-12 self-start">
-              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black leading-tight text-[#272b2e]">
-                Beyond payments,turning
-                <br className="hidden sm:block" />
-               roadblocks into runways.
-              </h1>
-              <p className="mt-6 text-lg sm:text-xl text-slate-600">
-                Run lean, maximise growth and move fast, because payments are
-                just the start.
-              </p>
-            </div>
+          <div className="lg:sticky lg:top-12 self-start">
+            <h1
+              className="
+                text-center lg:text-left
+                text-3xl sm:text-5xl lg:text-7xl font-black leading-[1.05]
+                text-[#272b2e] tracking-tight text-balance
+              "
+            >
+              {/* fixed spacing after comma for better readability */}
+              Beyond payments, turning
+              <br className="hidden sm:block" />
+              roadblocks into runways.
+            </h1>
 
+            <p
+              className="
+                mt-4 sm:mt-6
+                text-center lg:text-left
+                text-base sm:text-lg lg:text-xl text-slate-600
+                max-w-[60ch] mx-auto lg:mx-0 text-pretty
+              "
+            >
+              Run lean, maximise growth and move fast, because payments are just
+              the start.
+            </p>
           </div>
 
-          {/* ===== RIGHT: Desktop animated rail ===== */}
-          <div className="relative -mt-[100px]">
+          {/* RIGHT column */}
+          <div className="relative">
+            {/* Desktop animated rail (unchanged) */}
             <div
               ref={stageRef}
-              className="lg:sticky lg:top-20 my-8 h-[760px] relative hidden lg:block"
+              className="lg:sticky lg:top-20 my-6 sm:my-8 h-[760px] relative hidden lg:block"
             >
               <svg
                 ref={svgRef}
@@ -222,31 +234,34 @@ export default function Runways() {
               </ul>
             </div>
 
-            {/* ===== Mobile: compact 2-column cards (clean & readable) ===== */}
-            <div className="lg:hidden mt-8">
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            {/* Mobile: clean single-column list with perfect alignment */}
+            <div className="lg:hidden mt-6 sm:mt-8">
+              <ul className="space-y-3 sm:space-y-4">
                 {ITEMS.map((item, i) => (
                   <li key={i}>
-                    <div
+                    <button
+                      type="button"
                       className="
-            relative flex items-center gap-3 rounded-2xl p-3
-            bg-white text-slate-900 shadow-[0_6px_20px_rgba(0,0,0,0.08)]
-            ring-1 ring-black/5 min-h-[64px] active:scale-[.99]
-            transition-transform
-          "
+                        group relative w-full
+                        flex items-center gap-3
+                        rounded-2xl p-3.5 sm:p-4 pr-10
+                        bg-white text-slate-900
+                        ring-1 ring-black/5 shadow-[0_6px_20px_rgba(0,0,0,0.06)]
+                        active:scale-[.995] transition
+                        text-left
+                      "
                     >
-                      {/* left accent bar (warm gradient) */}
+                      {/* left accent bar */}
                       <span
                         className="
-              pointer-events-none absolute left-0 top-0 h-full w-[3px]
-              rounded-l-2xl
-              bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)]
-            "
+                          pointer-events-none absolute left-0 top-0 h-full w-[3px] rounded-l-2xl
+                          bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)]
+                        "
                         aria-hidden="true"
                       />
 
                       {/* avatar */}
-                      <span className="h-11 w-11 rounded-full overflow-hidden ring-2 ring-white/60 shrink-0">
+                      <span className="h-10 w-10 sm:h-11 sm:w-11 rounded-full overflow-hidden ring-2 ring-white/70 shrink-0">
                         {item.img ? (
                           <img
                             src={item.img}
@@ -259,14 +274,22 @@ export default function Runways() {
                         )}
                       </span>
 
-                      {/* label */}
-                      <span className="text-[13px] sm:text-[14px] font-semibold leading-snug">
+                      {/* text */}
+                      <span
+                        className="
+                          font-semibold leading-snug text-[13.5px] sm:text-sm
+                          text-slate-900/90
+                          break-words hyphens-auto
+                          [text-wrap:balance]
+                          line-clamp-2
+                        "
+                      >
                         {item.text}
                       </span>
 
                       {/* chevron */}
                       <svg
-                        className="ml-auto h-5 w-5 text-slate-400"
+                        className="ml-auto absolute right-3.5 sm:right-4 h-5 w-5 text-slate-400 group-hover:text-slate-500 transition"
                         viewBox="0 0 24 24"
                         fill="none"
                         aria-hidden="true"
@@ -279,7 +302,7 @@ export default function Runways() {
                           strokeLinejoin="round"
                         />
                       </svg>
-                    </div>
+                    </button>
                   </li>
                 ))}
               </ul>
