@@ -115,9 +115,7 @@ const STICKERS: Record<
   ],
 };
 
-/* -----------------------------------------------------------------------------
-   Interlocking hover card (TOP slide-down from behind image)
------------------------------------------------------------------------------ */
+
 function InterlockHoverCard({
   src,
   title,
@@ -454,9 +452,9 @@ export default function AnimatedFlow() {
         >
           <div className="hidden lg:block lg:col-span-6">
             <div className="relative lg:sticky lg:top-20">
-              <div className="mx-auto rounded-[30px] bg-neutral-50 p-8 w-[min(92vw,520px)]">
+              <div className="mx-auto rounded-[30px] p-8 w-[min(92vw,520px)]">
                 <div
-                  className="relative rounded-[24px] overflow-hidden bg-white"
+                  className="relative rounded-[24px] overflow-hidden "
                   style={{ width: "480px", height: "640px" }}
                 >
                   <AnimatePresence initial={false} mode="wait">
@@ -478,10 +476,10 @@ export default function AnimatedFlow() {
                           imageSrc={activeImg}
                           altText="Preview"
                           captionText=""
-                          containerHeight="640px"
-                          containerWidth="480px"
-                          imageHeight="640px"
-                          imageWidth="480px"
+                          containerHeight="540px"
+                          containerWidth="440px"
+                          imageHeight="540px"
+                          imageWidth="350px"
                           rotateAmplitude={12}
                           scaleOnHover={1.12}
                           showMobileWarning={false}
@@ -514,16 +512,16 @@ export default function AnimatedFlow() {
 
           {/* RIGHT: Scroll list */}
           <div className="lg:col-span-6" ref={listRef}>
-            <div className="space-y-6 sm:space-y-8 md:space-y-10 xl:space-y-12">
+            <div className="space-y-6 sm:space-y-8 md:space-y-10 xl:space-y-12  ">
               {contentBlocks.map((b, i) => (
                 <article
                   key={b.id}
                   data-img={b.img}
                   data-index={i}
-                  className="rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 bg-white w-full border border-neutral-200/70 shadow-[0_10px_30px_rgba(0,0,0,.06)]"
+                  className="rounded-2xl sm:rounded-3xl  p-5 sm:p-6 md:p-8 w-full "
                 >
-                  <div className="lg:hidden mb-4 overflow-hidden rounded-[16px] border border-neutral-200">
-                    <div className="relative w-full aspect-[3/4] bg-neutral-50">
+                  <div className="lg:hidden mb-4 overflow-hidden rounded-[16px] ">
+                    <div className="relative w-full aspect-[3/4] ">
                       <img
                         src={b.img}
                         alt={b.title}
@@ -533,30 +531,31 @@ export default function AnimatedFlow() {
                       />
                     </div>
                   </div>
+                  <div className="my-60">
+                    <h3 className="font-extrabold flex items-center gap-3 sm:gap-4 text-[clamp(18px,3.8vw,28px)]">
+                      <img
+                        src={b.imgt}
+                        alt=""
+                        className="h-10 w-10 sm:h-[52px] sm:w-[52px] rounded-full object-cover object-center"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      {b.title}
+                    </h3>
 
-                  <h3 className="font-extrabold flex items-center gap-3 sm:gap-4 text-[clamp(18px,3.8vw,28px)]">
-                    <img
-                      src={b.imgt}
-                      alt=""
-                      className="h-10 w-10 sm:h-[52px] sm:w-[52px] rounded-full object-cover object-center"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                    {b.title}
-                  </h3>
+                    <p className="mt-3 text-[clamp(14px,3.4vw,18px)] leading-[1.65] text-neutral-600">
+                      {b.desc}
+                    </p>
 
-                  <p className="mt-3 text-[clamp(14px,3.4vw,18px)] leading-[1.65] text-neutral-600">
-                    {b.desc}
-                  </p>
-
-                  <a
-                    href="/auth"
-                    className="mt-5 inline-flex items-center justify-center rounded-full px-5 py-2.5 text-[15px] font-extrabold text-white shadow-sm border border-black/5
+                    <a
+                      href="/auth"
+                      className="mt-5 inline-flex items-center justify-center rounded-full px-5 py-2.5 text-[15px] font-extrabold text-white shadow-sm border border-black/5
                                bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)]
                                hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500/40 active:scale-[.98] transition"
-                  >
-                    Get started
-                  </a>
+                    >
+                      Get started
+                    </a>
+                  </div>
                 </article>
               ))}
             </div>
