@@ -1,12 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
-const LINKS = [
-  { label: "Products", href: "#" },
-  { label: "Solutions", href: "#" },
-  { label: "Developers", href: "#" },
-  { label: "Resources", href: "#" },
-];
+
+
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -58,18 +54,6 @@ export default function Navbar() {
               />
             </a>
 
-            {/* Desktop nav */}
-            <nav className="hidden md:flex items-center gap-8 text-[15px] font-semibold text-neutral-700/80">
-              {LINKS.map((l) => (
-                <a
-                  key={l.label}
-                  className="hover:text-neutral-900 transition-colors"
-                  href={l.href}
-                >
-                  {l.label}
-                </a>
-              ))}
-            </nav>
 
             {/* Desktop CTA */}
             <div className="hidden md:flex items-center gap-3">
@@ -152,19 +136,6 @@ export default function Navbar() {
             </button>
           </div>
 
-          <ul className="px-5 py-4 space-y-1">
-            {LINKS.map((l) => (
-              <li key={l.label}>
-                <a
-                  href={l.href}
-                  onClick={close}
-                  className="block rounded-xl px-4 py-3 text-[16px] font-semibold text-neutral-900 hover:bg-neutral-100"
-                >
-                  {l.label}
-                </a>
-              </li>
-            ))}
-          </ul>
 
           <div className="px-5 pt-2 mt-auto">
             <a

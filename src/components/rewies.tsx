@@ -1,18 +1,18 @@
 // components/Testimonials.tsx
 "use client";
 
-import React, { useEffect, useState, useRef, JSX } from "react";
-import { motion, PanInfo, useMotionValue, useTransform } from "motion/react";
+import React, { useEffect, useState, useRef, JSX, useMemo } from "react";
+import { motion, PanInfo, useMotionValue, useTransform } from "framer-motion";
 
-// ---------------------------------------------
-// 1) Your original testimonials data
-// ---------------------------------------------
+/* ---------------------------------------------
+   1) Testimonials data
+--------------------------------------------- */
 type Testimonial = {
   id: string;
   name: string;
   role: string;
   studio: string;
-  avatar: string; // image url
+  avatar: string;
   quote: string;
 };
 
@@ -59,10 +59,9 @@ const DATA: Testimonial[] = [
   },
 ];
 
-// ---------------------------------------------
-// 2) Carousel implementation (from your snippet)
-//    Slightly adapted to use testimonial data
-// ---------------------------------------------
+/* ---------------------------------------------
+   2) Carousel
+--------------------------------------------- */
 export interface CarouselItem {
   title: string;
   description: string;
@@ -72,7 +71,7 @@ export interface CarouselItem {
 
 export interface CarouselProps {
   items?: CarouselItem[];
-  baseWidth?: number;
+  maxWidth?: number; // max container width on large screens
   autoplay?: boolean;
   autoplayDelay?: number;
   pauseOnHover?: boolean;
@@ -83,73 +82,112 @@ export interface CarouselProps {
 const DRAG_BUFFER = 0;
 const VELOCITY_THRESHOLD = 500;
 const GAP = 16;
-const SPRING_OPTIONS = { type: "spring", stiffness: 300, damping: 30 };
+const SPRING = { type: "spring", stiffness: 300, damping: 30 } as const;
+
+// null-safe ref accepted
+function useContainerWidth(
+  ref: React.RefObject<HTMLElement | null>,
+  fallback = 360
+) {
+  const [w, setW] = useState(fallback);
+  useEffect(() => {
+    if (!ref.current) return;
+    const el = ref.current;
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const cw = Math.floor(entry.contentRect.width);
+        if (cw > 0) setW(cw);
+      }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref]);
+  return w;
+}
 
 function Carousel({
   items = [],
-  baseWidth = 720,
+  maxWidth = 960,
   autoplay = true,
   autoplayDelay = 3500,
   pauseOnHover = true,
   loop = true,
   round = false,
 }: CarouselProps): JSX.Element {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const outerWidth = useContainerWidth(containerRef, 360);
+
   const containerPadding = 16;
-  const itemWidth = baseWidth - containerPadding * 2;
+  const effectiveWidth = Math.min(outerWidth, maxWidth);
+  const itemWidth = Math.max(240, effectiveWidth - containerPadding * 2);
   const trackItemOffset = itemWidth + GAP;
 
+  // seamless loop ke liye 1 duplicate at end
   const carouselItems = loop && items.length > 0 ? [...items, items[0]] : items;
+
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const x = useMotionValue(0);
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [isResetting, setIsResetting] = useState<boolean>(false);
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  // mobile par 3D band
+  const enable3D = useMemo(() => outerWidth >= 640, [outerWidth]);
+
   useEffect(() => {
-    if (pauseOnHover && containerRef.current) {
-      const container = containerRef.current;
-      const handleMouseEnter = () => setIsHovered(true);
-      const handleMouseLeave = () => setIsHovered(false);
-      container.addEventListener("mouseenter", handleMouseEnter);
-      container.addEventListener("mouseleave", handleMouseLeave);
-      return () => {
-        container.removeEventListener("mouseenter", handleMouseEnter);
-        container.removeEventListener("mouseleave", handleMouseLeave);
-      };
-    }
+    if (!pauseOnHover || !containerRef.current) return;
+    const el = containerRef.current;
+    const enter = () => setIsHovered(true);
+    const leave = () => setIsHovered(false);
+    el.addEventListener("mouseenter", enter);
+    el.addEventListener("mouseleave", leave);
+    return () => {
+      el.removeEventListener("mouseenter", enter);
+      el.removeEventListener("mouseleave", leave);
+    };
   }, [pauseOnHover]);
 
   useEffect(() => {
-    if (autoplay && (!pauseOnHover || !isHovered) && items.length > 1) {
-      const timer = setInterval(() => {
-        setCurrentIndex((prev) => {
-          if (prev === items.length - 1 && loop) {
-            return prev + 1;
-          }
-          if (prev === carouselItems.length - 1) {
-            return loop ? 0 : prev;
-          }
-          return prev + 1;
-        });
-      }, autoplayDelay);
-      return () => clearInterval(timer);
-    }
-  }, [autoplay, autoplayDelay, isHovered, loop, items.length, carouselItems.length, pauseOnHover]);
+    if (!autoplay || items.length <= 1) return;
+    if (pauseOnHover && isHovered) return;
 
-  const effectiveTransition = isResetting ? { duration: 0 } : SPRING_OPTIONS;
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => {
+        if (prev === items.length - 1 && loop) return prev + 1; // jump to duplicate
+        if (prev === carouselItems.length - 1) return loop ? 0 : prev;
+        return prev + 1;
+      });
+    }, autoplayDelay);
+
+    return () => clearInterval(timer);
+  }, [
+    autoplay,
+    autoplayDelay,
+    isHovered,
+    loop,
+    items.length,
+    carouselItems.length,
+    pauseOnHover,
+  ]);
+
+  const effectiveTransition = isResetting ? ({ duration: 0 } as const) : SPRING;
 
   const handleAnimationComplete = () => {
     if (loop && currentIndex === carouselItems.length - 1) {
+      // reached duplicate -> instant reset to real 0
       setIsResetting(true);
       x.set(0);
       setCurrentIndex(0);
-      setTimeout(() => setIsResetting(false), 50);
+      setTimeout(() => setIsResetting(false), 40);
     }
   };
 
-  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo): void => {
+  const handleDragEnd = (
+    _: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo
+  ): void => {
     const offset = info.offset.x;
     const velocity = info.velocity.x;
+
     if (offset < -DRAG_BUFFER || velocity < -VELOCITY_THRESHOLD) {
       if (loop && currentIndex === items.length - 1) {
         setCurrentIndex(currentIndex + 1);
@@ -177,56 +215,67 @@ function Carousel({
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden p-4 ${
-        round ? "rounded-full border border-white" : "rounded-[24px] border border-[#eaeaea] bg-white"
-      }`}
+      className={`relative overflow-hidden ${
+        round ? "rounded-full" : "rounded-2xl"
+      } border ${
+        round ? "border-white" : "border-[#eaeaea] bg-white"
+      } p-3 sm:p-4 shadow-[0_8px_30px_rgba(0,0,0,0.06)]`}
       style={{
-        width: `${baseWidth}px`,
-        ...(round && { height: `${baseWidth}px` }),
+        width: "100%",
+        ...(round && { height: `${Math.min(outerWidth, maxWidth)}px` }),
+        maxWidth: `${maxWidth}px`,
       }}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Testimonials carousel"
     >
       <motion.div
-        className="flex"
+        className="flex touch-pan-y"
         drag="x"
         {...dragProps}
         style={{
           width: itemWidth,
           gap: `${GAP}px`,
-          perspective: 1000,
-          perspectiveOrigin: `${currentIndex * trackItemOffset + itemWidth / 2}px 50%`,
+          perspective: enable3D ? 1000 : undefined,
+          perspectiveOrigin: enable3D
+            ? `${currentIndex * trackItemOffset + itemWidth / 2}px 50%`
+            : undefined,
           x,
         }}
         onDragEnd={handleDragEnd}
         animate={{ x: -(currentIndex * trackItemOffset) }}
-        // transition={effectiveTransition}
+        transition={effectiveTransition}
         onAnimationComplete={handleAnimationComplete}
       >
         {carouselItems.map((item, index) => {
-          const range = [-(index + 1) * trackItemOffset, -index * trackItemOffset, -(index - 1) * trackItemOffset];
-          const outputRange = [90, 0, -90];
+          const range = [
+            -(index + 1) * trackItemOffset,
+            -index * trackItemOffset,
+            -(index - 1) * trackItemOffset,
+          ];
+          const outputRange = enable3D ? [90, 0, -90] : [0, 0, 0];
           const rotateY = useTransform(x, range, outputRange, { clamp: false });
+
           return (
             <motion.div
               key={index}
-              className={`relative shrink-0 flex flex-col items-start justify-between rounded-[16px] border border-[#f0f0f0] bg-white overflow-hidden cursor-grab active:cursor-grabbing shadow-[0_8px_30px_rgba(0,0,0,0.06)]`}
-              style={{
-                width: itemWidth,
-                // let intrinsic content define height nicely on all screens
-                rotateY: rotateY,
-              }}
-              // transition={effectiveTransition}
+              className="relative shrink-0 flex flex-col items-start justify-between rounded-xl border border-[#f0f0f0] bg-white overflow-hidden cursor-grab active:cursor-grabbing"
+              style={{ width: itemWidth, rotateY }}
             >
-              <div className="w-full p-5">
+              <div className="w-full p-4 sm:p-5">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-[40px] w-[40px] items-center justify-center rounded-full ring-2 ring-white shadow">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full ring-2 ring-white shadow">
                     {item.icon}
                   </span>
-                  <div>
-                    <div className="font-semibold text-gray-900">{item.title}</div>
-                    {/* Small secondary line comes from description's meta if needed */}
+                  <div className="min-w-0">
+                    <div className="font-semibold text-gray-900 text-sm sm:text-base line-clamp-1">
+                      {item.title}
+                    </div>
                   </div>
                 </div>
-                <p className="mt-4 text-[15px] leading-relaxed text-gray-700">{item.description}</p>
+                <p className="mt-3 sm:mt-4 text-[13.5px] sm:text-[15px] leading-relaxed text-gray-700 whitespace-pre-line">
+                  {item.description}
+                </p>
               </div>
             </motion.div>
           );
@@ -234,32 +283,35 @@ function Carousel({
       </motion.div>
 
       {/* Dots */}
-      <div className={`flex w-full justify-center`}>
-        <div className="mt-4 flex w-[150px] justify-between px-8">
-          {items.map((_, index) => (
-            <motion.div
-              key={index}
-              className={`h-2 w-2 rounded-full cursor-pointer transition-colors duration-150 ${
-                currentIndex % items.length === index ? "bg-[#333]" : "bg-[rgba(51,51,51,0.35)]"
-              }`}
-              animate={{
-                scale: currentIndex % items.length === index ? 1.2 : 1,
-              }}
-              onClick={() => setCurrentIndex(index)}
-              transition={{ duration: 0.15 }}
-            />
-          ))}
+      <div className="mt-3 sm:mt-4 flex w-full justify-center">
+        <div className="flex items-center gap-3">
+          {items.map((_, index) => {
+            const active = currentIndex % items.length === index;
+            return (
+              <button
+                key={index}
+                aria-label={`Go to slide ${index + 1}`}
+                onClick={() => setCurrentIndex(index)}
+                className="group"
+              >
+                <motion.span
+                  className={`block rounded-full ${
+                    active ? "bg-[#333]" : "bg-[rgba(51,51,51,0.35)]"
+                  }`}
+                  style={{ width: active ? 10 : 8, height: active ? 10 : 8 }}
+                  animate={{ scale: active ? 1.15 : 1 }}
+                  transition={{ duration: 0.15 }}
+                />
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 }
 
-// ---------------------------------------------
-// 3) Page section: original left timeline + Carousel on right
-// ---------------------------------------------
-export default function Testimonials() {
-  // map testimonials to carousel items
+export default function Testimonials(): JSX.Element {
   const items: CarouselItem[] = DATA.map((t, i) => ({
     id: i + 1,
     title: `${t.name} · ${t.role}`,
@@ -268,19 +320,17 @@ export default function Testimonials() {
       <img
         src={t.avatar}
         alt={t.name}
-        className="h-[40px] w-[40px] rounded-full object-cover"
+        className="h-10 w-10 rounded-full object-cover"
       />
     ),
   }));
 
   return (
     <section className="relative w-full bg-white">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-16 md:grid-cols-[320px,1fr] md:gap-10 md:py-24 lg:px-8">
-        {/* LEFT: vertical timeline + heading */}
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-12 md:grid-cols-[300px,1fr] md:gap-10 md:py-20 lg:px-8">
+        {/* LEFT timeline (hidden on mobile) */}
         <aside className="relative hidden md:block">
-          {/* vertical line */}
           <div className="absolute left-6 top-0 h-full w-px bg-gray-200" />
-          {/* dots */}
           <ul className="absolute left-[22px] top-6 flex h-[calc(100%-3rem)] flex-col justify-between">
             {Array.from({ length: 6 }).map((_, i) => (
               <li
@@ -291,7 +341,7 @@ export default function Testimonials() {
           </ul>
 
           <div className="pl-16">
-            <h2 className="text-3xl font-light leading-tight text-gray-900">
+            <h2 className="text-2xl font-light leading-tight text-gray-900 lg:text-3xl">
               See why the
               <br />
               <span className="font-bold">world&apos;s</span>
@@ -303,15 +353,15 @@ export default function Testimonials() {
           </div>
         </aside>
 
-        {/* RIGHT: carousel */}
+        {/* RIGHT: responsive carousel */}
         <div className="w-full flex items-center justify-center">
           <Carousel
             items={items}
-            baseWidth={840}         // width of the carousel track
-            autoplay={true}
+            maxWidth={840}
+            autoplay
             autoplayDelay={3800}
-            pauseOnHover={true}
-            loop={true}
+            pauseOnHover
+            loop
             round={false}
           />
         </div>

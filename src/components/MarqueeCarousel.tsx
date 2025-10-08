@@ -1,28 +1,43 @@
 import { useEffect, useRef } from "react";
 
 const CARDS = [
-    "/Pine/imgi_39_homepage_government.webp",
+  "/Pine/imgi_39_homepage_government.webp",
   "/Pine/imgi_40_homepage_brands.webp",
   "/Pine/imgi_41_homepage_d2c.webp",
   "/Pine/imgi_42_homepage_banks.webp",
   "/Pine/imgi_43_homepage_fintech.webp",
-  "/Pine/homepage_startups.webp"
+  "/Pine/homepage_startups.webp",
 ];
 
 function Card({ src, i }: { src: string; i: number }) {
+  // Different size per index for variation
+  const sizeClasses = [
+    "h-[420px] md:h-[480px] lg:h-[500px]",
+    "h-[500px] md:h-[560px] lg:h-[580px]",
+    "h-[460px] md:h-[520px] lg:h-[540px]",
+    "h-[480px] md:h-[540px] lg:h-[560px]",
+    "h-[430px] md:h-[490px] lg:h-[510px]",
+    "h-[520px] md:h-[580px] lg:h-[600px]",
+  ];
+
   return (
     <a
       href="#"
-      className="relative w-[300px] md:w-[340px] lg:w-[380px] h-[460px] md:h-[520px] shrink-0 overflow-hidden rounded-3xl group"
+      className={`relative w-[260px] sm:w-[300px] md:w-[340px] lg:w-[370px] shrink-0 overflow-hidden rounded-3xl group transition-all duration-500 hover:scale-[1.03] ${
+        sizeClasses[i % sizeClasses.length]
+      }`}
     >
       <img
         className="absolute inset-0 w-full h-full object-cover"
         src={src}
         alt={`Card ${i + 1}`}
       />
+
       <span className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm text-white text-sm px-4 py-1 rounded-full">
         Fintech
       </span>
+
+      {/* Hover overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
         <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
           <div className="text-white">
@@ -58,11 +73,7 @@ export default function MarqueeCarousel() {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const setRef = useRef<HTMLDivElement>(null);
   const pausedRef = useRef(false);
-  const dragRef = useRef<{
-    startX: number;
-    startLeft: number;
-    dragging: boolean;
-  }>({
+  const dragRef = useRef({
     startX: 0,
     startLeft: 0,
     dragging: false,
@@ -76,13 +87,12 @@ export default function MarqueeCarousel() {
 
     let oneSetWidth = setEl.offsetWidth;
     let last = performance.now();
-    const speedPxPerSec = 80; // adjust speed here
+    const speedPxPerSec = 80;
     let raf = 0;
 
-    // start in the middle set so we can scroll both ways seamlessly
     const setInitial = () => {
       oneSetWidth = setEl.offsetWidth;
-      scroller.scrollLeft = oneSetWidth; // to the 2nd (middle) copy
+      scroller.scrollLeft = oneSetWidth;
     };
     setInitial();
 
@@ -95,49 +105,30 @@ export default function MarqueeCarousel() {
     ro.observe(setEl);
 
     const loop = (now: number) => {
-      const dt = Math.min(64, now - last); // clamp big jumps
+      const dt = Math.min(64, now - last);
       last = now;
       if (!pausedRef.current) {
         scroller.scrollLeft += (speedPxPerSec * dt) / 1000;
       }
-
-      // wrap seamlessly across the 3 copies
-      if (scroller.scrollLeft >= oneSetWidth * 2) {
+      if (scroller.scrollLeft >= oneSetWidth * 2)
         scroller.scrollLeft -= oneSetWidth;
-      } else if (scroller.scrollLeft <= 0) {
-        scroller.scrollLeft += oneSetWidth;
-      }
-
+      else if (scroller.scrollLeft <= 0) scroller.scrollLeft += oneSetWidth;
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
 
-    // pause/resume helpers
-    let resumeTimer: number | undefined;
-    const pause = () => {
-      pausedRef.current = true;
-      if (resumeTimer) window.clearTimeout(resumeTimer);
-    };
+    const pause = () => (pausedRef.current = true);
     const resumeSoon = (ms = 1200) => {
-      if (resumeTimer) window.clearTimeout(resumeTimer);
-      resumeTimer = window.setTimeout(() => (pausedRef.current = false), ms);
+      const id = setTimeout(() => (pausedRef.current = false), ms);
+      return () => clearTimeout(id);
     };
 
-    // hover pause (desktop)
-    const onEnter = () => pause();
-    const onLeave = () => resumeSoon();
-
-    scroller.addEventListener("mouseenter", onEnter);
-    scroller.addEventListener("mouseleave", onLeave);
-
-    // wheel (shift/trackpad) -> pause while scrolling, then resume
     const onWheel = () => {
       pause();
       resumeSoon();
     };
     scroller.addEventListener("wheel", onWheel, { passive: true });
 
-    // drag-to-scroll for mouse users
     const onPointerDown = (e: PointerEvent) => {
       scroller.setPointerCapture(e.pointerId);
       dragRef.current = {
@@ -154,7 +145,6 @@ export default function MarqueeCarousel() {
       scroller.scrollLeft = dragRef.current.startLeft - dx;
     };
     const onPointerUp = (e: PointerEvent) => {
-      if (!dragRef.current.dragging) return;
       dragRef.current.dragging = false;
       scroller.releasePointerCapture(e.pointerId);
       scroller.style.cursor = "";
@@ -165,32 +155,22 @@ export default function MarqueeCarousel() {
     scroller.addEventListener("pointermove", onPointerMove);
     scroller.addEventListener("pointerup", onPointerUp);
     scroller.addEventListener("pointercancel", onPointerUp);
-    scroller.addEventListener("touchstart", pause, { passive: true });
-    scroller.addEventListener("touchend", () => resumeSoon(), {
-      passive: true,
-    });
 
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
-      scroller.removeEventListener("mouseenter", onEnter);
-      scroller.removeEventListener("mouseleave", onLeave);
       scroller.removeEventListener("wheel", onWheel);
       scroller.removeEventListener("pointerdown", onPointerDown);
       scroller.removeEventListener("pointermove", onPointerMove);
       scroller.removeEventListener("pointerup", onPointerUp);
       scroller.removeEventListener("pointercancel", onPointerUp);
-      scroller.removeEventListener("touchstart", pause);
-      scroller.removeEventListener("touchend", () => resumeSoon());
-      if (resumeTimer) window.clearTimeout(resumeTimer);
     };
   }, []);
 
-  const reel = [...CARDS]; // one set (we’ll render 3 sets)
+  const reel = [...CARDS];
 
   return (
     <section className="py-20 bg-neutral-50">
-      {/* Header container */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
@@ -202,30 +182,28 @@ export default function MarqueeCarousel() {
         </div>
       </div>
 
-      {/* Full-bleed, scrollable, auto-scrolling rail */}
       <div className="relative mt-10">
         <div
           ref={scrollerRef}
           className="relative mx-[calc(50%-50vw)] w-screen overflow-x-auto overflow-y-hidden no-scrollbar cursor-grab"
           aria-label="Scrolling showcase"
         >
-          {/* Edge fades */}
+          {/* edge fade overlays */}
           <div className="pointer-events-none absolute inset-y-0 left-0 w-20 sm:w-28 bg-gradient-to-r from-neutral-50 to-transparent z-10" />
           <div className="pointer-events-none absolute inset-y-0 right-0 w-20 sm:w-28 bg-gradient-to-l from-neutral-50 to-transparent z-10" />
 
-          {/* 3 copies for seamless wrap */}
-          <div className="inline-flex items-stretch gap-6 px-4">
-            <div ref={setRef} className="inline-flex gap-6">
+          <div className="inline-flex items-end gap-6 px-4">
+            <div ref={setRef} className="inline-flex items-end gap-6">
               {reel.map((src, i) => (
                 <Card key={`a-${i}`} src={src} i={i} />
               ))}
             </div>
-            <div className="inline-flex gap-6">
+            <div className="inline-flex items-end gap-6">
               {reel.map((src, i) => (
                 <Card key={`b-${i}`} src={src} i={i} />
               ))}
             </div>
-            <div className="inline-flex gap-6">
+            <div className="inline-flex items-end gap-6">
               {reel.map((src, i) => (
                 <Card key={`c-${i}`} src={src} i={i} />
               ))}
@@ -234,20 +212,9 @@ export default function MarqueeCarousel() {
         </div>
       </div>
 
-      {/* tiny util to hide scrollbars */}
       <style>{`
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          [aria-label="Scrolling showcase"] {
-            scroll-behavior: auto !important;
-          }
-        }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>
     </section>
   );

@@ -13,7 +13,7 @@ const spring: Transition = {
 
 const leftImages = [
   "/Pine/online.jpg",
-  "/Pine/instore.jpg",
+  "/Pine/i1.jpg",
   "/Pine/prepaid.jpg",
   "/Pine/credit.jpg",
 ];
