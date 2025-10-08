@@ -1,5 +1,4 @@
 "use client";
-// @ts-nocheck
 
 import { useEffect, useRef, useState } from "react";
 import {
@@ -8,6 +7,7 @@ import {
   LayoutGroup,
   useScroll,
   useMotionValueEvent,
+  type Variants,
 } from "framer-motion";
 import TiltedCard from "./TiltedCard";
 
@@ -51,7 +51,13 @@ const contentBlocks = [
 ];
 
 /* ---------- Side Sticker Presets ---------- */
-const STICKERS = {
+const STICKERS: Record<
+  number,
+  Array<
+    | { id: string; type: "chip"; emoji: string; label: string; delay?: number }
+    | { id: string; type: "img"; imgSrc: string; delay?: number }
+  >
+> = {
   1: [
     { id: "c-top", type: "chip", emoji: "✅", label: "Enrolled", delay: 0.05 },
     { id: "c-mid", type: "img", imgSrc: "/Pine/c1.png", delay: 0.12 },
@@ -111,9 +117,6 @@ const STICKERS = {
 
 /* -----------------------------------------------------------------------------
    Interlocking hover card (TOP slide-down from behind image)
-   - Text BLACK, centered at top
-   - Rest: clipped & behind image
-   - Hover: slide-down (Y only), above image (zIndex)
 ----------------------------------------------------------------------------- */
 function InterlockHoverCard({
   src,
@@ -121,34 +124,36 @@ function InterlockHoverCard({
   initialTilt = -6,
   width = 300,
   height = 440,
+}: {
+  src: string;
+  title: string;
+  initialTilt?: number;
+  width?: number;
+  height?: number;
 }) {
-  const container = {
+  const container: Variants = {
     rest: { rotate: initialTilt, scale: 1 },
     hover: {
       rotate: 0,
       scale: 1.03,
-      transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+      transition: { duration: 0.45, ease: "easeOut" },
     },
   };
 
-  // Start above & behind -> slide DOWN on hover (no sideways movement)
-  const headline = {
-    rest: { opacity: 0, y: "-110%", zIndex: 0, filter: "blur(4px)" },
+  const headline: Variants = {
+    rest: { opacity: 0, y: "-120%", zIndex: 0, filter: "blur(4px)" as any },
     hover: {
       opacity: 1,
       y: 10,
       zIndex: 30,
-      filter: "blur(0px)",
-      transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
+      filter: "blur(0px)" as any,
+      transition: { duration: 0.3, ease: "easeOut" },
     },
   };
 
-  const glow = {
+  const glow: Variants = {
     rest: { opacity: 0 },
-    hover: {
-      opacity: 0.12,
-      transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
-    },
+    hover: { opacity: 0.12, transition: { duration: 0.35, ease: "easeOut" } },
   };
 
   return (
@@ -215,25 +220,31 @@ function InterlockHoverCard({
   );
 }
 
-/* ---------- Random side stickers (bigger + float) ---------- */
-function SideStickers({ activeIdx, show }) {
+/* ---------- Random side stickers (typed + float) ---------- */
+function SideStickers({
+  activeIdx,
+  show,
+}: {
+  activeIdx: number;
+  show: boolean;
+}) {
   const block = contentBlocks[activeIdx];
   const stickers = STICKERS[block.id] ?? [];
-  const rand = (min, max) => Math.random() * (max - min) + min;
+  const rand = (min: number, max: number) => Math.random() * (max - min) + min;
 
-  const variants = {
-    hidden: { opacity: 0, scale: 0.6, filter: "blur(6px)" },
-    visible: (delay) => ({
+  const variants: Variants = {
+    hidden: { opacity: 0, scale: 0.6, filter: "blur(6px)" as any },
+    visible: (delay: number) => ({
       opacity: 1,
       scale: 1,
-      filter: "blur(0px)",
-      transition: { delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+      filter: "blur(0px)" as any,
+      transition: { delay, duration: 0.5, ease: "easeOut" },
     }),
     exit: {
       opacity: 0,
       scale: 0.9,
-      filter: "blur(4px)",
-      transition: { duration: 0.3 },
+      filter: "blur(4px)" as any,
+      transition: { duration: 0.3, ease: "easeOut" },
     },
   };
 
@@ -298,7 +309,7 @@ function SideStickers({ activeIdx, show }) {
                     }}
                   >
                     <img
-                      src={s.imgSrc}
+                      src={(s as any).imgSrc}
                       alt=""
                       className="h-full w-full object-cover"
                       loading="lazy"
@@ -317,12 +328,13 @@ function SideStickers({ activeIdx, show }) {
 
 /* ---------- Main ---------- */
 export default function AnimatedFlow() {
-  const [activeImg, setActiveImg] = useState(contentBlocks[0].img);
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [fly, setFly] = useState(false);
-  const listRef = useRef(null);
-  const swapRef = useRef(null);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [activeImg, setActiveImg] = useState<string>(contentBlocks[0].img);
+  const [activeIdx, setActiveIdx] = useState<number>(0);
+  const [fly, setFly] = useState<boolean>(false);
+
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const swapRef = useRef<HTMLDivElement | null>(null);
+  const [isDesktop, setIsDesktop] = useState<boolean>(false);
 
   useEffect(() => {
     const mql = window.matchMedia("(min-width: 1024px)");
@@ -336,13 +348,15 @@ export default function AnimatedFlow() {
     if (!isDesktop) return;
     const root = listRef.current;
     if (!root) return;
-    const items = Array.from(root.querySelectorAll("[data-img]"));
+
+    const items = Array.from(root.querySelectorAll<HTMLElement>("[data-img]"));
     const io = new IntersectionObserver(
       (ents) =>
-        ents.forEach((e) => {
-          if (e.isIntersecting) {
-            const src = e.target.dataset.img;
-            const idx = Number(e.target.dataset.index);
+        ents.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            const src = el.dataset.img!;
+            const idx = Number(el.dataset.index);
             setActiveImg(src);
             setActiveIdx(idx);
           }
@@ -368,7 +382,8 @@ export default function AnimatedFlow() {
     { x: 620, y: -280, z: 7, r: -0.3 },
     { x: 880, y: -420, z: 8, r: -0.2 },
     { x: 1140, y: -560, z: 9, r: -0.1 },
-  ];
+  ] as const;
+
   const interlockingImgs = [
     activeImg,
     contentBlocks[1].img,
@@ -415,7 +430,7 @@ export default function AnimatedFlow() {
                     }}
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
-                    transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.55, ease: "easeOut" }}
                     layoutId={isFirst ? "fly-card" : undefined}
                   >
                     <InterlockHoverCard
@@ -484,10 +499,7 @@ export default function AnimatedFlow() {
                         decoding="async"
                         initial={{ opacity: 0, scale: 0.96 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        transition={{
-                          duration: 0.7,
-                          ease: [0.25, 0.8, 0.25, 1],
-                        }}
+                        transition={{ duration: 0.7, ease: "easeOut" }}
                       />
                     )}
                   </AnimatePresence>
