@@ -70,22 +70,19 @@ export default function RedVideoCards() {
         {/* Cards */}
         <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { title: "Add it to your stack", src: "/Pine/red1.mp4" },
-            { title: "Go code free", src: "/Pine/red1.mp4" },
-            { title: "Explore pre-built recipes", src: "/Pine/red1.mp4" },
-            { title: "Build with us", src: "/Pine/red1.mp4" },
+            { title: "Add it to your stack", src: "/Pine/r1.png" },
+            { title: "Go code free", src: "/Pine/r2.png" },
+            { title: "Explore pre-built recipes", src: "/Pine/r3.png" },
+            { title: "Build with us", src: "/Pine/r4.png" },
           ].map((c, i) => (
             <article
               key={i}
               className="group relative overflow-hidden rounded-[2rem] border border-white/5 p-6 sm:p-8 bg-white/0 hover:bg-white/[0.01] transition-colors"
             >
               <div className="relative aspect-[16/10] overflow-hidden rounded-2xl ring-1 ring-white/10">
-                <video
+                <img
                   src={c.src}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
+              alt=""
                   className="w-full h-full object-cover"
                 />
                 <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-[#2bffde]/15" />

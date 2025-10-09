@@ -1,63 +1,77 @@
+"use client";
 import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 
-type Item = {
-  text: string;
-  img?: string;
-  variant?: "light" | "dark";
-};
+type Item = { text: string; img?: string; variant?: "light" | "dark" };
 
 const ITEMS: Item[] = [
-  { text: "Grow revenue with embedded bill payments", img: "/Pine/c1.webp", variant: "dark" },
+  {
+    text: "Grow revenue with embedded bill payments",
+    img: "/Pine/c1.webp",
+    variant: "dark",
+  },
   { text: "Manage Corporate Expenses", img: "/Pine/c2.webp", variant: "dark" },
-  { text: "Drive efficiency through billing integrations", img: "/Pine/c3.webp", variant: "dark" },
+  {
+    text: "Drive efficiency through billing integrations",
+    img: "/Pine/c3.webp",
+    variant: "dark",
+  },
   { text: "Acquire new customers", img: "/Pine/c4.webp", variant: "dark" },
-  { text: "Deliver refunds and vouchers to customers", img: "/Pine/c5.webp", variant: "dark" },
+  {
+    text: "Deliver refunds and vouchers to customers",
+    img: "/Pine/c5.webp",
+    variant: "dark",
+  },
   { text: "Enhance employee rewards", img: "/Pine/c6.webp", variant: "dark" },
   { text: "Automate vendor payouts", img: "/Pine/c7.webp", variant: "dark" },
   { text: "Scale credit & financing", img: "/Pine/c5.webp", variant: "dark" },
 ];
 
 export default function Runways() {
+  // Desktop refs
   const svgRef = useRef<SVGSVGElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const railRef = useRef<HTMLUListElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const svg = svgRef.current,
-      path = pathRef.current,
-      rail = railRef.current,
-      stage = stageRef.current;
-    if (!svg || !path || !rail || !stage) return;
+  // Mobile refs
+  const mSvgRef = useRef<SVGSVGElement>(null);
+  const mPathRef = useRef<SVGPathElement>(null);
+  const mRailRef = useRef<HTMLUListElement>(null);
+  const mStageRef = useRef<HTMLDivElement>(null);
 
-    const nodes = Array.from(rail.querySelectorAll<HTMLLIElement>("li"));
+  /** Common path-follow engine */
+  const attachPathFollow = (
+    svgEl: SVGSVGElement,
+    pathEl: SVGPathElement,
+    railEl: HTMLUListElement,
+    baseSpeed = 0.06
+  ) => {
+    const VBX = svgEl.viewBox.baseVal.width || 600;
+    const VBY = svgEl.viewBox.baseVal.height || 760;
+    const L = pathEl.getTotalLength();
 
-    // ViewBox + path length
-    const VBX = 600, VBY = 760;
-    const L = path.getTotalLength();
-    let sx = 2, sy = 1;
-
-    nodes.forEach((li, i) => {
-      li.dataset.offset = String(i / nodes.length);
-      li.style.willChange = "transform";
-    });
-
+    let sx = 1,
+      sy = 1;
     const recalcScale = () => {
-      const r = svg.getBoundingClientRect();
+      const r = svgEl.getBoundingClientRect();
       sx = r.width / VBX;
       sy = r.height / VBY;
     };
     recalcScale();
     const ro = new ResizeObserver(recalcScale);
-    ro.observe(svg);
+    ro.observe(svgEl);
 
-    // Auto + scroll direction
+    const nodes = Array.from(railEl.querySelectorAll<HTMLLIElement>("li"));
+    nodes.forEach((li, i) => {
+      li.dataset.offset = String(i / nodes.length);
+      li.style.willChange = "transform";
+    });
+
     let base = 0;
     let lastTime = performance.now();
-    const BASE_SPEED = 0.06;
     const SCROLL_BOOST = 0.55;
     const DIR_SMOOTH = 0.12;
-
     let targetDir = 1;
     let dir = 1;
     let lastScrollY = window.scrollY;
@@ -77,28 +91,28 @@ export default function Runways() {
       lastTime = now;
 
       dir += (targetDir - dir) * DIR_SMOOTH;
-      const speed = BASE_SPEED * (1 + SCROLL_BOOST * Math.abs(dir));
+      const speed = baseSpeed * (1 + SCROLL_BOOST * Math.abs(dir));
       base += speed * dir * dt;
 
       for (const li of nodes) {
         const seed = parseFloat(li.dataset.offset || "0");
         const p = (((base + seed) % 1) + 1) % 1;
-        const pt = path.getPointAtLength(p * L);
+        const pt = pathEl.getPointAtLength(p * L);
 
-        // place node
-        li.style.transform = `translate(${pt.x * sx}px, ${pt.y * sy}px) translate(-50%, -50%)`;
+        li.style.transform = `translate(${pt.x * sx}px, ${
+          pt.y * sy
+        }px) translate(-50%, -50%)`;
 
-        // depth weight
+        // depth look
         const weight = 1 - Math.abs(0.5 - p) * 3;
         const card = li.firstElementChild as HTMLElement | null;
         if (card) {
-          const sc = 1 + 0.05 * weight;
-
-          // 👉 use CSS var so we can inverse-scale avatar in pure CSS
+          const sc = 1 + 0.06 * weight;
           card.style.setProperty("--sc", String(sc));
-          card.style.opacity = String(0.55 + 0.45 * weight);
-          card.style.filter = `drop-shadow(0 18px 28px rgba(0,0,0,${0.1 + 0.18 * weight}))`;
-          card.style.willChange = "transform, opacity, filter";
+          card.style.opacity = String(0.6 + 0.4 * weight);
+          card.style.filter = `drop-shadow(0 18px 28px rgba(0,0,0,${
+            0.1 + 0.2 * weight
+          }))`;
         }
       }
 
@@ -117,33 +131,83 @@ export default function Runways() {
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
       document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("scroll", onScroll);
       ro.disconnect();
+    };
+  };
+
+  // desktop init
+  useEffect(() => {
+    const svg = svgRef.current,
+      path = pathRef.current,
+      rail = railRef.current,
+      stage = stageRef.current;
+    if (!svg || !path || !rail || !stage) return;
+    return attachPathFollow(svg, path, rail, 0.06);
+  }, []);
+
+  // mobile init (same behaviour)
+  useEffect(() => {
+    const mm = window.matchMedia("(max-width:1023.5px)");
+    let cleanup: (() => void) | null = null;
+
+    const boot = () => {
+      cleanup?.();
+      if (!mm.matches) return;
+      const svg = mSvgRef.current,
+        path = mPathRef.current,
+        rail = mRailRef.current,
+        stage = mStageRef.current;
+      if (!svg || !path || !rail || !stage) return;
+      cleanup = attachPathFollow(svg, path, rail, 0.08);
+    };
+
+    boot();
+    mm.addEventListener("change", boot);
+    return () => {
+      mm.removeEventListener("change", boot);
+      cleanup?.();
     };
   }, []);
 
+  const sheen = (
+    <motion.span
+      aria-hidden
+      className="pointer-events-none absolute inset-0 rounded-full"
+      style={{
+        WebkitMaskImage:
+          "linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,0) 60%)",
+        maskImage:
+          "linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,0) 60%)",
+      }}
+      animate={{ backgroundPositionX: ["-200%", "200%"] }}
+      transition={{ repeat: Infinity, duration: 3.2, ease: "linear" }}
+    />
+  );
+
   return (
-    <section className="relative overflow-hidden ">
-      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 ">
+    <section className="relative overflow-hidden">
+      <style>{`.sheen-bg{background-image:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);background-size:200% 100%}`}</style>
+
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-start">
-          {/* LEFT copy */}
-          <div className="lg:sticky lg:top-12 mt-44 self-start">
-            <h1 className="text-center lg:text-left font-thin text-3xl sm:text-4xl lg:text-5xl leading-[1.05] text-[#272b2e] tracking-tight text-balance">
-              Beyond payments, turning
-              roadblocks into runways.
+          {/* LEFT */}
+          <div className="lg:sticky lg:top-12 mt-0 md:mt-44 self-start">
+            <h1 className="text-center lg:text-left font-extrabold tracking-tight text-3xl sm:text-4xl lg:text-6xl leading-[1.05] text-[#272b2e]">
+              Beyond payments, turning roadblocks into runways.
             </h1>
-            <p className="mt-4 sm:mt-6 text-center lg:text-left text-base sm:text-lg lg:text-xl text-slate-600 max-w-[60ch] mx-auto lg:mx-0 text-pretty">
+            <p className="mt-5 text-center lg:text-left text-base sm:text-lg lg:text-xl text-slate-600 max-w-[60ch] mx-auto lg:mx-0">
               Run lean, maximise growth and move fast, because payments are just
               the start.
             </p>
           </div>
 
-          {/* RIGHT column */}
-          <div className="relative mr-60 ">
-            {/* Top/Bottom fades */}
-            <div className="absolute top-0 left-0 w-[600px] h-32 bg-gradient-to-b from-white via-white/70 to-transparent backdrop-blur-sm z-10 pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-[600px] h-32 bg-gradient-to-t from-white via-white/70 to-transparent backdrop-blur-sm z-10 pointer-events-none" />
+          {/* RIGHT */}
+          <div className="relative lg:mr-60">
+            {/* fades (desktop) */}
+            <div className="absolute top-0 left-0 w-[600px] h-32 bg-gradient-to-b from-white via-white/70 to-transparent backdrop-blur-sm z-10 pointer-events-none hidden lg:block" />
+            <div className="absolute bottom-0 left-0 w-[600px] h-32 bg-gradient-to-t from-white via-white/70 to-transparent backdrop-blur-sm z-10 pointer-events-none hidden lg:block" />
 
             {/* Desktop rail */}
             <div
@@ -168,72 +232,14 @@ export default function Runways() {
               </svg>
 
               <ul ref={railRef} className="absolute inset-0">
-                {ITEMS.map((item, i) => {
-                  const isLight = item.variant === "light";
-                  return (
-                    <li key={i} className="absolute h-24">
-                      <div
-                        className={[
-                          // 👉 fixed layout: same width + min height + perfect alignment
-                          "group flex items-center gap-4 rounded-full px-5 pr-7 py-3 ring-1 transition-all duration-300",
-                          "w-[300px] min-h-[70px]", // fixed width & height for consistent alignment
-                          "[transform:scale(var(--sc,1))]", // scale via CSS var
-                          isLight
-                            ? "bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)] ring-white/50 text-pink-900"
-                            : "bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)] ring-white/10 text-white",
-                        ].join(" ")}
-                        style={{ willChange: "transform, opacity, filter" }}
-                      >
-                        {/* 👉 FIXED avatar size + inverse scale */}
-                        <div
-                          className={[
-                            "js-avatar shrink-0 rounded-full overflow-hidden ring-2 ring-white/20",
-                            "flex items-center justify-center",
-                            "h-12 w-12",
-                            "[transform:scale(calc(1/var(--sc,1)))]", // inverse scale
-                            "origin-center will-change-transform",
-                          ].join(" ")}
-                        >``
-                          {item.img ? (
-                            <img
-                              src={item.img}
-                              alt=""
-                              className="h-full w-full object-cover"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="h-full w-full bg-gradient-to-br from-emerald-400 to-emerald-700" />
-                          )}
-                        </div>
-
-                        {/* 👉 Text area fixed rules for clean alignment */}
-                        <h5
-                          className={[
-                            "font-semibold text-sm leading-tight",
-                            "text-white/95 text-left",
-                            "select-none",
-                          ].join(" ")}
-                        >
-                          {item.text}
-                        </h5>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-
-            {/* Mobile simple list */}
-            <div className="lg:hidden mt-6 sm:mt-8">
-              <ul className="space-y-3 sm:space-y-4">
                 {ITEMS.map((item, i) => (
-                  <li key={i}>
-                    <button
-                      type="button"
-                      className="group relative w-full flex items-center gap-4 rounded-2xl p-3.5 sm:p-4 pr-10 bg-white text-slate-900 ring-1 ring-black/5 shadow-[0_6px_20px_rgba(0,0,0,0.06)] active:scale-[.995] transition text-left min-h-[72px]"
+                  <li key={i} className="absolute h-24">
+                    <div
+                      className="group flex items-center gap-4 rounded-full px-5 pr-7 py-3 ring-1 transition-all duration-300 w-[300px] min-h-[70px]
+                                 [transform:scale(var(--sc,1))]
+                                 bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)] ring-white/10 text-white"
                     >
-                      <span className="absolute left-0 top-0 h-full w-[3px] rounded-l-2xl bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)] pointer-events-none" />
-                      <span className="h-11 w-11 rounded-full overflow-hidden ring-2 ring-white/70 shrink-0 flex items-center justify-center">
+                      <div className="shrink-0 rounded-full overflow-hidden ring-2 ring-white/25 h-12 w-12">
                         {item.img ? (
                           <img
                             src={item.img}
@@ -242,31 +248,75 @@ export default function Runways() {
                             loading="lazy"
                           />
                         ) : (
-                          <span className="block h-full w-full bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)]" />
+                          <div className="h-full w-full bg-gradient-to-br from-pink-400 to-pink-700" />
                         )}
-                      </span>
-                      <span className="font-semibold leading-tight text-[13.5px] sm:text-sm text-slate-900/90 break-words [text-wrap:balance] line-clamp-2">
+                      </div>
+                      <h5 className="font-semibold text-sm leading-tight text-white/95 text-left">
                         {item.text}
-                      </span>
-                      <svg
-                        className="ml-auto absolute right-3.5 sm:right-4 h-5 w-5 text-slate-400 group-hover:text-slate-500 transition"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M9 6l6 6-6 6"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
+                      </h5>
+                    </div>
                   </li>
                 ))}
               </ul>
             </div>
+
+            {/* Mobile rail (image INSIDE card) */}
+            <div className="lg:hidden mt-8 relative mr-36">
+              <div ref={mStageRef} className="relative my-2 h-[560px]">
+                <svg
+                  ref={mSvgRef}
+                  className="absolute inset-0 w-full h-full -z-10 pointer-events-none"
+                  viewBox="0 0 360 560"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    ref={mPathRef}
+                    d="M330 10 C 250 110, 250 450, 330 550"
+                    stroke="#10b981"
+                    strokeOpacity=".16"
+                    strokeWidth="2"
+                    strokeDasharray="6 10"
+                  />
+                </svg>
+
+                <ul ref={mRailRef} className="absolute inset-0">
+                  {ITEMS.map((item, i) => (
+                    <li key={i} className="absolute h-20">
+                      <div
+                        className="relative flex items-center gap-3 rounded-full pl-4 pr-6 py-3 w-[300px] min-h-[56px]
+                                   bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)]
+                                   text-white font-semibold leading-tight ring-1 ring-black/5 shadow-[0_10px_24px_rgba(0,0,0,.14)]
+                                   [transform:scale(var(--sc,1))] ml-10"
+                      >
+                        {/* avatar now inside the pill */}
+                        <span className="shrink-0 h-10 w-10 rounded-full overflow-hidden ring-2 ring-white bg-white">
+                          {item.img ? (
+                            <img
+                              src={item.img}
+                              alt=""
+                              className="h-full w-full object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span className="block h-full w-full bg-gradient-to-br from-emerald-300 to-emerald-600" />
+                          )}
+                        </span>
+
+                        {/* sheen + text */}
+                        <span className="sheen-bg pointer-events-none absolute inset-0 rounded-full" />
+                        <span className="relative z-10 text-[13.5px] text-white/95">
+                          {item.text}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mx-auto mt-4 h-[2px] w-4/5 rounded-full bg-black/5" />
+            </div>
+            {/* /Mobile */}
           </div>
         </div>
       </div>
