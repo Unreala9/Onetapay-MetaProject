@@ -1,6 +1,5 @@
 "use client";
-
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   motion,
   AnimatePresence,
@@ -61,7 +60,13 @@ const STICKERS: Record<
   1: [
     { id: "c-top", type: "chip", emoji: "✅", label: "Enrolled", delay: 0.05 },
     { id: "c-mid", type: "img", imgSrc: "/Pine/c1.png", delay: 0.12 },
-    { id: "c-bot", type: "chip", emoji: "⏱️", label: "Self-paced", delay: 0.18 },
+    {
+      id: "c-bot",
+      type: "chip",
+      emoji: "⏱️",
+      label: "Self-paced",
+      delay: 0.18,
+    },
   ],
   2: [
     { id: "d-top", type: "chip", emoji: "💬", label: "Live chat", delay: 0.05 },
@@ -69,25 +74,53 @@ const STICKERS: Record<
     { id: "d-bot", type: "chip", emoji: "⚡", label: "Real-time", delay: 0.18 },
   ],
   3: [
-    { id: "p-succ", type: "chip", emoji: "🟢", label: "Payment Successful", delay: 0.05 },
-    { id: "p-emi", type: "chip", emoji: "💳", label: "No-cost EMI", delay: 0.12 },
+    {
+      id: "p-succ",
+      type: "chip",
+      emoji: "🟢",
+      label: "Payment Successful",
+      delay: 0.05,
+    },
+    {
+      id: "p-emi",
+      type: "chip",
+      emoji: "💳",
+      label: "No-cost EMI",
+      delay: 0.12,
+    },
     { id: "p-card", type: "img", imgSrc: "/Pine/i1.jpg", delay: 0.18 },
   ],
   4: [
     { id: "t-top", type: "chip", emoji: "📣", label: "Updates", delay: 0.05 },
     { id: "t-mid", type: "img", imgSrc: "/Pine/t1.png", delay: 0.12 },
-    { id: "t-bot", type: "chip", emoji: "🔔", label: "Instant alerts", delay: 0.18 },
+    {
+      id: "t-bot",
+      type: "chip",
+      emoji: "🔔",
+      label: "Instant alerts",
+      delay: 0.18,
+    },
   ],
   5: [
-    { id: "w-top", type: "chip", emoji: "🎥", label: "Live webinar", delay: 0.05 },
+    {
+      id: "w-top",
+      type: "chip",
+      emoji: "🎥",
+      label: "Live webinar",
+      delay: 0.05,
+    },
     { id: "w-mid", type: "img", imgSrc: "/Pine/w1.png", delay: 0.12 },
     { id: "w-bot", type: "chip", emoji: "⭐", label: "Q&A", delay: 0.18 },
   ],
 };
 
 /* =========================================================================
-   MOBILE CARD — aligned & responsive
+   MOBILE CARD — fixed 320×560, widgets safe, CTAs pinned
    ========================================================================= */
+const MOBILE_CARD_W = 320;
+const MOBILE_CARD_H = 650;
+const MOBILE_IMAGE_H = 440;
+
 function MobileStackedCard({
   src,
   title,
@@ -103,17 +136,22 @@ function MobileStackedCard({
 }) {
   return (
     <div
-      className={`relative w-[88vw] max-w-[420px] shrink-0 rounded-3xl overflow-hidden bg-white
-                  border border-black/[0.06] shadow-[0_12px_40px_-10px_rgba(0,0,0,0.22)]
-                  transition-all duration-500 hover:shadow-[0_18px_60px_-12px_rgba(0,0,0,0.30)] hover:-translate-y-0.5`}
+      className="relative shrink-0 rounded-3xl overflow-hidden bg-white
+                 border border-black/[0.06] shadow-[0_12px_40px_-10px_rgba(0,0,0,0.22)]
+                 transition-all duration-500 hover:shadow-[0_18px_60px_-12px_rgba(0,0,0,0.30)] hover:-translate-y-0.5
+                 flex flex-col z-20"
+      style={{ width: MOBILE_CARD_W, height: MOBILE_CARD_H }}
     >
-      {/* TOP: Visual panel */}
+      {/* TOP: Visual */}
       <div className="relative p-3">
-        <div className="relative rounded-2xl overflow-hidden">
+        <div
+          className="relative rounded-2xl overflow-hidden"
+          style={{ width: MOBILE_CARD_W - 24, height: MOBILE_IMAGE_H }}
+        >
           <img
             src={src}
             alt={title}
-            className="w-[320px] h-[500px]  object-cover"
+            className="w-full h-full object-cover"
             loading="lazy"
             decoding="async"
           />
@@ -126,9 +164,9 @@ function MobileStackedCard({
           />
         </div>
 
-        {/* floating mini widgets — tightened for mobile */}
-        <div className="absolute -bottom-6 left-4 right-4 flex gap-3">
-          <div className="flex-1 rounded-xl bg-white shadow-[0_10px_30px_rgba(0,0,0,.08)] border border-black/5 p-3">
+        {/* floating widgets (compact) */}
+        <div className="absolute -bottom-6 left-3 right-3 flex gap-2">
+          <div className="flex-[0_0_60%] rounded-xl bg-white shadow-[0_10px_30px_rgba(0,0,0,.08)] border border-black/5 p-3">
             <p className="text-[10px] text-neutral-500 mb-2">Quick Actions</p>
             <div className="grid grid-cols-4 gap-2">
               {["Pay", "Scan", "Cards", "Bills"].map((t) => (
@@ -144,7 +182,7 @@ function MobileStackedCard({
               ))}
             </div>
           </div>
-          <div className="w-[44%] rounded-xl bg-white shadow-[0_10px_30px_rgba(0,0,0,.08)] border border-black/5 p-3">
+          <div className="w-[40%] rounded-xl bg-white shadow-[0_10px_30px_rgba(0,0,0,.08)] border border-black/5 p-3">
             <p className="text-[10px] text-neutral-500">Rates</p>
             <div className="mt-1 space-y-2">
               <div className="flex items-center justify-between">
@@ -161,10 +199,10 @@ function MobileStackedCard({
       </div>
 
       {/* BOTTOM: Content */}
-      <div className="pt-10 px-4 pb-4">
+      <div className="pt-12 px-4 pb-4 flex flex-col min-h-0 grow">
         <div className="flex items-center gap-2 mb-2">
           <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-50 px-2 py-[2px] text-[11px] text-emerald-700">
-            <span className="inline-block size-[6px] rounded-full bg-emerald-500" />
+            <span className="inline-block size-[6px] rounded-full bg-emerald-500" />{" "}
             {tag}
           </span>
         </div>
@@ -172,26 +210,28 @@ function MobileStackedCard({
         <h3 className="text-[18px] font-extrabold leading-tight text-neutral-900">
           {title}
         </h3>
-        <p className="mt-2 text-[13px] leading-6 text-neutral-600 md:hidden block">{desc}</p>
 
-        {/* CTA Group — centered + wrap on mobile */}
-        <div className="mt-4 flex flex-wrap items-center justify-start sm:justify-start gap-2.5">
+        {/* desc fills free space; scrolls if long */}
+        <p className="mt-2 text-[13px] leading-6 text-neutral-600 md:hidden block flex-1 overflow-y-auto overscroll-contain pr-1">
+          {desc}
+        </p>
+
+        {/* CTAs — equal width, no overflow */}
+        <div className="mt-4 grid grid-cols-2 gap-2">
           <a
             href="/auth"
             className="inline-flex items-center justify-center rounded-full px-4 py-2 text-[13px] font-extrabold text-white
-                       shadow-sm border border-black/5
-                       bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)]
-                       hover:brightness-110 active:scale-[.98] transition"
-            aria-label="Get started"
+                        shadow-sm border border-black/5
+                        bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)]
+                        hover:brightness-110 active:scale-[.98] transition"
           >
             Get started
           </a>
           <a
             href="#"
             className="inline-flex items-center justify-center rounded-full px-4 py-2 text-[13px] font-bold
-                       text-neutral-800 bg-white border border-neutral-200
-                       hover:bg-neutral-50 active:scale-[.98] transition"
-            aria-label="Explore now"
+                        text-neutral-800 bg-white border border-neutral-200
+                        hover:bg-neutral-50 active:scale-[.98] transition"
           >
             Explore now
           </a>
@@ -202,7 +242,7 @@ function MobileStackedCard({
 }
 
 /* =========================================================================
-   MOBILE MARQUEE — better alignment & start position
+   MOBILE MARQUEE — safe padding so fades don't cover cards
    ========================================================================= */
 function MobileMarqueeCarousel() {
   const reel = contentBlocks.map((b) => ({
@@ -210,7 +250,6 @@ function MobileMarqueeCarousel() {
     title: b.title,
     desc: b.desc,
   }));
-
   const scrollerRef = useRef<HTMLDivElement>(null);
   const setRef = useRef<HTMLDivElement>(null);
   const pausedRef = useRef(false);
@@ -228,7 +267,6 @@ function MobileMarqueeCarousel() {
 
     const setInitial = () => {
       oneSetWidth = setEl.offsetWidth;
-      // center start: put middle set at left so first card appears centered
       requestAnimationFrame(() => {
         scroller.scrollLeft = oneSetWidth;
       });
@@ -246,8 +284,10 @@ function MobileMarqueeCarousel() {
     const loop = (now: number) => {
       const dt = Math.min(64, now - last);
       last = now;
-      if (!pausedRef.current) scroller.scrollLeft += (speedPxPerSec * dt) / 1000;
-      if (scroller.scrollLeft >= oneSetWidth * 2) scroller.scrollLeft -= oneSetWidth;
+      if (!pausedRef.current)
+        scroller.scrollLeft += (speedPxPerSec * dt) / 1000;
+      if (scroller.scrollLeft >= oneSetWidth * 2)
+        scroller.scrollLeft -= oneSetWidth;
       else if (scroller.scrollLeft <= 0) scroller.scrollLeft += oneSetWidth;
       raf = requestAnimationFrame(loop);
     };
@@ -304,31 +344,51 @@ function MobileMarqueeCarousel() {
   }, []);
 
   return (
-    <section className="lg:hidden p sm:py-12 bg-neutral-50">
+    <section className="lg:hidden sm:py-12 bg-neutral-50">
       <div className="relative mt-4">
         <div
           ref={scrollerRef}
           className="relative mx-[calc(50%-50vw)] w-screen overflow-x-auto overflow-y-hidden no-scrollbar cursor-grab"
           aria-label="Scrolling showcase"
+          style={{ paddingBottom: 8 }}
         >
-          {/* edge fades */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-12 sm:w-16 bg-gradient-to-r from-neutral-50 to-transparent z-10" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-16 bg-gradient-to-l from-neutral-50 to-transparent z-10" />
+          {/* edge fades below cards */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-12 sm:w-16 bg-gradient-to-r from-neutral-50 to-transparent z-[5]" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-16 bg-gradient-to-l from-neutral-50 to-transparent z-[5]" />
 
-          <div className="inline-flex items-end gap-4 sm:gap-6 px-3 sm:px-4">
+          {/* inner padding so fades don't overlap content */}
+          <div className="inline-flex items-end gap-4 sm:gap-6 px-5 sm:px-6">
             <div ref={setRef} className="inline-flex items-end gap-4 sm:gap-6">
               {reel.map((c, i) => (
-                <MobileStackedCard key={`a-${i}`} src={c.src} title={c.title} desc={c.desc} i={i} />
+                <MobileStackedCard
+                  key={`a-${i}`}
+                  src={c.src}
+                  title={c.title}
+                  desc={c.desc}
+                  i={i}
+                />
               ))}
             </div>
             <div className="inline-flex items-end gap-4 sm:gap-6">
               {reel.map((c, i) => (
-                <MobileStackedCard key={`b-${i}`} src={c.src} title={c.title} desc={c.desc} i={i} />
+                <MobileStackedCard
+                  key={`b-${i}`}
+                  src={c.src}
+                  title={c.title}
+                  desc={c.desc}
+                  i={i}
+                />
               ))}
             </div>
             <div className="inline-flex items-end gap-4 sm:gap-6">
               {reel.map((c, i) => (
-                <MobileStackedCard key={`c-${i}`} src={c.src} title={c.title} desc={c.desc} i={i} />
+                <MobileStackedCard
+                  key={`c-${i}`}
+                  src={c.src}
+                  title={c.title}
+                  desc={c.desc}
+                  i={i}
+                />
               ))}
             </div>
           </div>
@@ -344,7 +404,7 @@ function MobileMarqueeCarousel() {
 }
 
 /* =========================================================================
-   DESKTOP CARD (hover tilt + top pop text)
+   DESKTOP CARD + rest (unchanged)
    ========================================================================= */
 function InterlockHoverCard({
   src,
@@ -361,9 +421,12 @@ function InterlockHoverCard({
 }) {
   const container: Variants = {
     rest: { rotate: initialTilt, scale: 1 },
-    hover: { rotate: 0, scale: 1.03, transition: { duration: 0.45, ease: "easeOut" } },
+    hover: {
+      rotate: 0,
+      scale: 1.03,
+      transition: { duration: 0.45, ease: "easeOut" },
+    },
   };
-
   const headline: Variants = {
     rest: { opacity: 0, y: "-120%", zIndex: 0, filter: "blur(4px)" as any },
     hover: {
@@ -374,19 +437,22 @@ function InterlockHoverCard({
       transition: { duration: 0.3, ease: "easeOut" },
     },
   };
-
   const glow: Variants = {
     rest: { opacity: 0 },
     hover: { opacity: 0.12, transition: { duration: 0.35, ease: "easeOut" } },
   };
-
   return (
-    <motion.div className="relative will-change-transform" variants={container} initial="rest" whileHover="hover" style={{ height, width }}>
+    <motion.div
+      className="relative will-change-transform"
+      variants={container}
+      initial="rest"
+      whileHover="hover"
+      style={{ height, width }}
+    >
       <motion.div
         className="relative rounded-2xl overflow-hidden border border-neutral-200 bg-white shadow-[0_10px_30px_rgba(0,0,0,.08)]"
         style={{ height, width }}
       >
-        {/* IMAGE */}
         <div className="relative z-10">
           <TiltedCard
             imageSrc={src}
@@ -412,18 +478,12 @@ function InterlockHoverCard({
             }}
           />
         </div>
-
-        {/* TOP POP TEXT */}
         <motion.div
           className="pointer-events-none absolute left-0 right-0 flex justify-center"
           style={{ top: 0 }}
           variants={headline}
         >
-          <div
-            className="inline-flex items-center justify-center rounded-full border border-black/10
-                       bg-white/85 backdrop-blur-md shadow-[0_6px_18px_rgba(0,0,0,0.12)]
-                       px-4 py-2 mt-2 text-[16px] font-extrabold text-black tracking-tight"
-          >
+          <div className="inline-flex items-center justify-center rounded-full border border-black/10 bg-white/85 backdrop-blur-md shadow-[0_6px_18px_rgba(0,0,0,0.12)] px-4 py-2 mt-2 text-[16px] font-extrabold text-black tracking-tight">
             {title}
           </div>
         </motion.div>
@@ -432,65 +492,97 @@ function InterlockHoverCard({
   );
 }
 
-/* ---------- Random side stickers ---------- */
-function SideStickers({ activeIdx, show }: { activeIdx: number; show: boolean }) {
+function SideStickers({
+  activeIdx,
+  show,
+}: {
+  activeIdx: number;
+  show: boolean;
+}) {
   const block = contentBlocks[activeIdx];
   const stickers = STICKERS[block.id] ?? [];
   const rand = (min: number, max: number) => Math.random() * (max - min) + min;
-
   const variants: Variants = {
     hidden: { opacity: 0, scale: 0.6, filter: "blur(6px)" as any },
-    visible: (delay: number) => ({
+    visible: (d: number) => ({
       opacity: 1,
       scale: 1,
       filter: "blur(0px)" as any,
-      transition: { delay, duration: 0.5, ease: "easeOut" },
+      transition: { delay: d, duration: 0.5, ease: "easeOut" },
     }),
-    exit: { opacity: 0, scale: 0.9, filter: "blur(4px)" as any, transition: { duration: 0.3, ease: "easeOut" } },
+    exit: {
+      opacity: 0,
+      scale: 0.9,
+      filter: "blur(4px)" as any,
+      transition: { duration: 0.3, ease: "easeOut" },
+    },
   };
-
   return (
     <AnimatePresence mode="wait">
       {show && (
-        <div key={`stickers-${block.id}`} className="pointer-events-none absolute inset-0">
-          {stickers.map((s, i) => {
-            const randomX = rand(160, 250);
-            const randomY = rand(-150, 150);
-            const floatDur = rand(5, 8);
-
-            return (
-              <motion.div
-                key={s.id}
-                className="absolute"
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                variants={variants}
-                custom={s.delay ?? i * 0.1}
-                style={{ right: `${randomX}px`, top: `calc(50% + ${randomY}px)` }}
-              >
-                {s.type === "chip" ? (
-                  <motion.div
-                    className="rounded-2xl bg-white/95 backdrop-blur-md border border-neutral-200 shadow-[0_10px_30px_rgba(0,0,0,.08)] px-4 py-2 text-[14px] font-semibold text-neutral-800"
-                    animate={{ y: [0, -8, 0], rotate: [0, 1.5, -1.5, 0], scale: [1, 1.05, 1] }}
-                    transition={{ duration: floatDur, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <span className="mr-1">{(s as any).emoji}</span>
-                    {(s as any).label}
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    className="rounded-xl overflow-hidden border border-neutral-200 bg-white shadow-[0_10px_30px_rgba(0,0,0,.1)]"
-                    style={{ width: 100, height: 100 }}
-                    animate={{ y: [0, -15, 0], x: [0, 4, -4, 0], rotate: [0, 3, -3, 0], scale: [1, 1.05, 1] }}
-                    transition={{ duration: floatDur, repeat: Infinity, ease: "easeInOut", delay: rand(0, 1) }}
-                  >
-                    <img src={(s as any).imgSrc} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
-                  </motion.div>
-                )}
-              </motion.div>
-            );
-          })}
+        <div
+          key={`stickers-${block.id}`}
+          className="pointer-events-none absolute inset-0"
+        >
+          {stickers.map((s, i) => (
+            <motion.div
+              key={s.id}
+              className="absolute"
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={variants}
+              custom={(s as any).delay ?? i * 0.1}
+              style={{
+                right: `${rand(160, 250)}px`,
+                top: `calc(50% + ${rand(-150, 150)}px)`,
+              }}
+            >
+              {s.type === "chip" ? (
+                <motion.div
+                  className="rounded-2xl bg-white/95 backdrop-blur-md border border-neutral-200 shadow-[0_10px_30px_rgba(0,0,0,.08)] px-4 py-2 text-[14px] font-semibold text-neutral-800"
+                  animate={{
+                    y: [0, -8, 0],
+                    rotate: [0, 1.5, -1.5, 0],
+                    scale: [1, 1.05, 1],
+                  }}
+                  transition={{
+                    duration: rand(5, 8),
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  <span className="mr-1">{(s as any).emoji}</span>
+                  {(s as any).label}
+                </motion.div>
+              ) : (
+                <motion.div
+                  className="rounded-xl overflow-hidden border border-neutral-200 bg-white shadow-[0_10px_30px_rgba(0,0,0,.1)]"
+                  style={{ width: 100, height: 100 }}
+                  animate={{
+                    y: [0, -15, 0],
+                    x: [0, 4, -4, 0],
+                    rotate: [0, 3, -3, 0],
+                    scale: [1, 1.05, 1],
+                  }}
+                  transition={{
+                    duration: rand(5, 8),
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: rand(0, 1),
+                  }}
+                >
+                  <img
+                    src={(s as any).imgSrc}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </motion.div>
+              )}
+            </motion.div>
+          ))}
         </div>
       )}
     </AnimatePresence>
@@ -519,17 +611,14 @@ export default function AnimatedFlow() {
     if (!isDesktop) return;
     const root = listRef.current;
     if (!root) return;
-
     const items = Array.from(root.querySelectorAll<HTMLElement>("[data-img]"));
     const io = new IntersectionObserver(
       (ents) =>
         ents.forEach((entry) => {
           if (entry.isIntersecting) {
             const el = entry.target as HTMLElement;
-            const src = el.dataset.img!;
-            const idx = Number(el.dataset.index);
-            setActiveImg(src);
-            setActiveIdx(idx);
+            setActiveImg(el.dataset.img!);
+            setActiveIdx(Number(el.dataset.index));
           }
         }),
       { threshold: 0.45, rootMargin: "0px 0px -10% 0px" }
@@ -538,12 +627,14 @@ export default function AnimatedFlow() {
     return () => io.disconnect();
   }, [isDesktop]);
 
-  const { scrollYProgress } = useScroll({ target: swapRef, offset: ["start 90%", "end 10%"] });
+  const { scrollYProgress } = useScroll({
+    target: swapRef,
+    offset: ["start 90%", "end 10%"],
+  });
   useMotionValueEvent(scrollYProgress, "change", (v) => {
     if (isDesktop) setFly(v > 0 && v < 1);
   });
 
-  /* interlocking positions (desktop) */
   const steps = [
     { x: 100, y: 0, z: 5, r: -1 },
     { x: 360, y: -140, z: 6, r: -0.5 },
@@ -675,8 +766,6 @@ export default function AnimatedFlow() {
                       />
                     )}
                   </AnimatePresence>
-
-                  {/* Right-side random stickers */}
                   <SideStickers activeIdx={activeIdx} show={true} />
                 </div>
               </div>
@@ -705,16 +794,14 @@ export default function AnimatedFlow() {
                       />
                       {b.title}
                     </h3>
-
                     <p className="mt-3 text-[clamp(14px,3.4vw,18px)] leading-[1.65] text-neutral-600">
                       {b.desc}
                     </p>
-
                     <a
                       href="/auth"
                       className="mt-5 inline-flex items-center justify-center rounded-full px-5 py-2.5 text-[15px] font-extrabold text-white shadow-sm border border-black/5
-                               bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)]
-                               hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500/40 active:scale-[.98] transition"
+                                  bg-[radial-gradient(125%_125%_at_50%_0%,#ff6a3d_0%,#ff2d55_40%,#d7137d_100%)]
+                                  hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500/40 active:scale-[.98] transition"
                     >
                       Get started
                     </a>
