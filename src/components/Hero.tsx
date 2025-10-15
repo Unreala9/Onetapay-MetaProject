@@ -82,14 +82,13 @@ export default function Hero() {
           </div>
 
           {/* RIGHT — Desktop video */}
-          <div className="col-span-12 lg:col-span-6 xl:col-span-7 lg:mt-20 md:block hidden">
+          <div className="col-span-12 lg:col-span-6 xl:col-span-7 md:block  hidden">
             <div className="relative w-full  flex justify-center items-center">
               <div className="relative w-full  max-w-[720px] rounded-3xl overflow-hidden">
-                {/* Aspect wrapper: kill baseline + clamp overflow */}
-                <div className="relative w-full [aspect-ratio:14/9] sm:[aspect-ratio:14/9] overflow-hidden leading-none">
+                <div className="relative w-full [aspect-ratio:16/16] overflow-hidden leading-none">
                   <video
                     ref={videoDesktopRef}
-                    className="absolute inset-0 h-full w-full object-cover block scale-[1.01]"
+                    className="absolute inset-0 w-full h-full object-cover block scale-[1.01] "
                     playsInline
                     muted
                     loop
@@ -98,7 +97,7 @@ export default function Hero() {
                     controls={false}
                     controlsList="nodownload noplaybackrate nofullscreen"
                   >
-                    <source src="/Pine/hero.mp4" type="video/mp4" />
+                    <source src="/Pine/hero1.mp4" type="video/mp4" />
                   </video>
                   <div className="absolute bottom-0 left-0 right-0 h-px bg-white z-10" />
                 </div>
@@ -107,7 +106,7 @@ export default function Hero() {
           </div>
 
           {/* RIGHT — Mobile video (portrait) */}
-          <div className="col-span-12 lg:col-span-6 xl:col-span-7 lg:mt-20 md:hidden block">
+          <div className="col-span-12 lg:col-span-6 xl:col-span-7 lg:mt-20 block md:hidden">
             <div className="relative w-full flex justify-center items-center">
               <div className="absolute -inset-16 -z-10 rounded-full blur-3xl opacity-70" />
               <div className="relative w-full max-w-[320px] sm:max-w-[360px] rounded-3xl overflow-hidden">
@@ -123,7 +122,7 @@ export default function Hero() {
                     controls={false}
                     controlsList="nodownload noplaybackrate nofullscreen"
                   >
-                    <source src="/Pine/hero.mp4" type="video/mp4" />
+                    <source src="/Pine/herom1.mp4" type="video/mp4" />
                   </video>
                 </div>
               </div>

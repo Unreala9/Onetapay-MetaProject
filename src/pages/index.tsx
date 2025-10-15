@@ -9,7 +9,7 @@ import PlatformCards from "@/components/PlatformCards";
 import CtaSection from "@/components/CtaSection";
 import Footer from "@/components/Footer";
 import CurvedLoop from "@/components/CurvedloopProps";
-import Intersect from "@/components/intersect"
+import Intersect from "@/components/Intersect"
 
 export default function Index() {
   return (

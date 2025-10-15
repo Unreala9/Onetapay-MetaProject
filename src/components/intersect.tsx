@@ -18,7 +18,7 @@ const contentBlocks = [
     imgt: "/Pine/c1.png",
     title: "Courses",
     desc: "Our courses combine theory with practical learning to strengthen your foundation and enhance expertise. Each module is carefully structured to deliver real-world skills, insights, and confidence, helping you progress step by step toward professional and personal growth effectively.",
-    img: "/Pine/inter1.png",
+    img: "/Pine/coursegen.png",
   },
   {
     id: 2,
@@ -32,7 +32,7 @@ const contentBlocks = [
     imgt: "/Pine/i1.jpg",
     title: "In-store Payments",
     desc: "Our in-store payment solutions provide seamless, fast, and secure transactions. Designed for reliability, they enhance customer trust and make business operations simpler. With multiple payment support, your customers experience smooth checkouts, while you enjoy effortless financial management with advanced technology.",
-    img: "/Pine/inter3.png",
+    img: "/Pine/in3.png",
   },
   {
     id: 4,
@@ -113,7 +113,7 @@ function MobileStackedCard({
           <img
             src={src}
             alt={title}
-            className="w-full h-[350px] sm:h-[420px] object-cover"
+            className="w-[320px] h-[500px]  object-cover"
             loading="lazy"
             decoding="async"
           />
@@ -172,7 +172,7 @@ function MobileStackedCard({
         <h3 className="text-[18px] font-extrabold leading-tight text-neutral-900">
           {title}
         </h3>
-        <p className="mt-2 text-[13px] leading-6 text-neutral-600">{desc}</p>
+        <p className="mt-2 text-[13px] leading-6 text-neutral-600 md:hidden block">{desc}</p>
 
         {/* CTA Group — centered + wrap on mobile */}
         <div className="mt-4 flex flex-wrap items-center justify-start sm:justify-start gap-2.5">
@@ -559,7 +559,7 @@ export default function AnimatedFlow() {
     contentBlocks[3].img,
     contentBlocks[4].img,
   ];
-  const titles = ["Cards", "QR Pay", "Prepaid", "Congrats!", "Wallet"];
+  const titles = ["Courses", "Discord", "In-store", "Telegram", "Webinar"];
 
   return (
     <LayoutGroup>
@@ -608,8 +608,8 @@ export default function AnimatedFlow() {
                       src={interlockingImgs[idx]}
                       title={titles[idx]}
                       initialTilt={-1}
-                      width={280}
-                      height={350}
+                      width={320}
+                      height={500}
                     />
                   </motion.div>
                 );
@@ -650,10 +650,10 @@ export default function AnimatedFlow() {
                           imageSrc={activeImg}
                           altText="Preview"
                           captionText=""
-                          containerHeight="350px"
-                          containerWidth="280px"
-                          imageHeight="350px"
-                          imageWidth="280px"
+                          containerHeight="500px"
+                          containerWidth="320px"
+                          imageHeight="500px"
+                          imageWidth="320px"
                           rotateAmplitude={12}
                           scaleOnHover={1.12}
                           showMobileWarning={false}

@@ -1,16 +1,60 @@
 import { useEffect, useRef } from "react";
 
 const CARDS = [
-  "/Pine/imgi_39_homepage_government.webp",
-  "/Pine/imgi_40_homepage_brands.webp",
-  "/Pine/imgi_41_homepage_d2c.webp",
-  "/Pine/imgi_42_homepage_banks.webp",
-  "/Pine/imgi_43_homepage_fintech.webp",
-  "/Pine/homepage_startups.webp",
+  "/Pine/s1.avif",
+  "/Pine/s2.avif",
+  "/Pine/s3.avif",
+  "/Pine/s4.avif",
+  "/Pine/s5.avif",
+  "/Pine/s1.jpg",
 ];
 
-function Card({ src, i }: { src: string; i: number }) {
-  // Different size per index for variation
+const FINTECH_CONTENT = [
+  {
+    label: "Payments",
+    title: "Mobile recharge, DTH, Insurance",
+    subtitle: "Smart payments & insights",
+  },
+  {
+    label: "Lending",
+    title: "Instant loans & credit",
+    subtitle: "Easy access to funds",
+  },
+  {
+    label: "Investments",
+    title: "Grow your portfolio",
+    subtitle: "Mutual funds & stocks",
+  },
+  {
+    label: "Wealth Management",
+    title: "Personalized advisory",
+    subtitle: "Maximize your assets",
+  },
+  {
+    label: "Insurance",
+    title: "Health, auto & life plans",
+    subtitle: "Secure your future",
+  },
+  {
+    label: "Savings",
+    title: "High-interest accounts",
+    subtitle: "Save more efficiently",
+  },
+];
+
+function Card({
+  src,
+  i,
+  label,
+  title,
+  subtitle,
+}: {
+  src: string;
+  i: number;
+  label: string;
+  title: string;
+  subtitle: string;
+}) {
   const sizeClasses = [
     "h-[420px] md:h-[480px] lg:h-[500px]",
     "h-[500px] md:h-[560px] lg:h-[580px]",
@@ -34,17 +78,15 @@ function Card({ src, i }: { src: string; i: number }) {
       />
 
       <span className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm text-white text-sm px-4 py-1 rounded-full">
-        Fintech
+        {label}
       </span>
 
       {/* Hover overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
         <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
           <div className="text-white">
-            <p className="text-lg font-semibold drop-shadow">
-              Mobile recharge, DTH, Insurance
-            </p>
-            <p className="text-xs text-white/80">Smart payments & insights</p>
+            <p className="text-lg font-semibold drop-shadow">{title}</p>
+            <p className="text-xs text-white/80">{subtitle}</p>
           </div>
           <span className="flex items-center gap-1 text-sm font-medium bg-white text-neutral-900 px-4 py-2 rounded-full shadow">
             Know more
@@ -195,17 +237,44 @@ export default function MarqueeCarousel() {
           <div className="inline-flex items-end gap-6 px-4">
             <div ref={setRef} className="inline-flex items-end gap-6">
               {reel.map((src, i) => (
-                <Card key={`a-${i}`} src={src} i={i} />
+                <Card
+                  key={`a-${i}`}
+                  src={src}
+                  i={i}
+                  label={FINTECH_CONTENT[i % FINTECH_CONTENT.length].label}
+                  title={FINTECH_CONTENT[i % FINTECH_CONTENT.length].title}
+                  subtitle={
+                    FINTECH_CONTENT[i % FINTECH_CONTENT.length].subtitle
+                  }
+                />
               ))}
             </div>
             <div className="inline-flex items-end gap-6">
               {reel.map((src, i) => (
-                <Card key={`b-${i}`} src={src} i={i} />
+                <Card
+                  key={`b-${i}`}
+                  src={src}
+                  i={i}
+                  label={FINTECH_CONTENT[i % FINTECH_CONTENT.length].label}
+                  title={FINTECH_CONTENT[i % FINTECH_CONTENT.length].title}
+                  subtitle={
+                    FINTECH_CONTENT[i % FINTECH_CONTENT.length].subtitle
+                  }
+                />
               ))}
             </div>
             <div className="inline-flex items-end gap-6">
               {reel.map((src, i) => (
-                <Card key={`c-${i}`} src={src} i={i} />
+                <Card
+                  key={`c-${i}`}
+                  src={src}
+                  i={i}
+                  label={FINTECH_CONTENT[i % FINTECH_CONTENT.length].label}
+                  title={FINTECH_CONTENT[i % FINTECH_CONTENT.length].title}
+                  subtitle={
+                    FINTECH_CONTENT[i % FINTECH_CONTENT.length].subtitle
+                  }
+                />
               ))}
             </div>
           </div>
