@@ -117,14 +117,14 @@ export default function RedVideoCards() {
         </div>
 
         {/* Cards */}
-        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           {cards.map((c, i) => (
             <article
               key={i}
               onMouseEnter={() => setHoveredIndex(i)}
               onMouseLeave={() => setHoveredIndex(null)}
               className={`group relative overflow-hidden rounded-[2rem] border border-white/5 p-6 sm:p-8 transition-colors duration-300 ${
-                hoveredIndex === i ? "bg-black" : "bg-white/0"
+                hoveredIndex === i ? "bg-black/70" : "bg-white/0"
               }`}
             >
               <div className="relative aspect-[16/12] overflow-hidden rounded-2xl ring-1 ring-white/10">
