@@ -650,7 +650,7 @@ export default function AnimatedFlow() {
     contentBlocks[3].img,
     contentBlocks[4].img,
   ];
-  const titles = ["Courses", "Discord", "In-store", "Telegram", "Webinar"];
+const titles = ["","","","", ""];
 
   return (
     <LayoutGroup>

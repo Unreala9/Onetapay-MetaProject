@@ -47,7 +47,7 @@ export default function RedVideoCards() {
     },
     {
       title: "Go code free",
-      img: "/Pine/r2.avif",
+      img: "/Pine/r2.png",
       video: "/Pine/r2.mp4",
     },
     {
